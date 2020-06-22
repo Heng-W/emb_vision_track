@@ -1,0 +1,121 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:gravity="center_horizontal"
+	android:background="@null">
+
+
+	<TextView 
+		android:id="@+id/track_mode_tv"
+		style="@style/TvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_marginBottom="10dp"
+		android:textColor="@color/black"
+		android:text="追踪模式：单尺度"/>
+
+	<FrameLayout
+		android:layout_width="320dp"
+		android:layout_height="240dp">
+
+		<ImageView
+			android:id="@+id/img"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:adjustViewBounds="true"
+			android:scaleType="fitXY"
+			android:background="@color/black"/>
+
+		<pers.hw.evtrack.view.ImageSurfaceView
+			android:id="@+id/img_surface"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="@null"/>
+
+	</FrameLayout>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10dp"		
+		android:gravity="center_horizontal">
+
+		<Button
+			android:id="@+id/track_ctl_btn"
+			style="@style/BtnStyle"		
+			android:text="开始追踪"/>
+
+		<View
+			android:layout_width="50dp"
+			android:layout_height="0dp"/>
+
+		<Button
+			android:id="@+id/set_target_btn"
+			style="@style/BtnStyle"	
+			android:text="选择目标"/>
+
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="25dp"	
+		android:gravity="center_vertical">
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="match_parent"
+			android:layout_weight="1"
+			android:layout_marginLeft="10dp"
+			android:orientation="vertical"
+			android:gravity="center">
+
+			<TextView 
+				android:id="@+id/pan_mode_tv"
+				style="@style/TvStyle"	
+				android:layout_marginBottom="10dp"
+				android:textColor="@color/black"
+				android:textSize="18sp"
+				android:text="云台模式：手动"/>
+
+			<ImageButton
+				android:id="@+id/pan_mode_btn"
+				android:src="@drawable/mode_chg"
+				style="@style/ImgBtnStyle"
+				android:layout_width="60dp"
+				android:layout_height="60dp"
+				android:scaleType="fitCenter"/>
+
+
+			<TextView 
+				style="@style/TipTvStyle"
+				android:text="模式切换"/>
+
+
+		</LinearLayout>
+
+
+		<pers.hw.evtrack.view.RoundMenuView
+			android:id="@+id/round_menu"
+			android:gravity="center"
+			android:layout_width="0dp"
+			android:layout_height="130dp"
+			android:layout_weight="1"
+			android:layout_marginLeft="5dp"
+			android:layout_marginRight="5dp"
+
+			app:hasCenter="true"
+			app:centerRadiusCoff="0.5"
+			app:strokeWidth="8"
+			app:angleStart="-135"
+			app:menuCnt="4"
+			app:fillColor="@color/sky_blue"
+			app:centerFillColor="@color/white"/>
+
+	</LinearLayout>
+
+
+</LinearLayout>

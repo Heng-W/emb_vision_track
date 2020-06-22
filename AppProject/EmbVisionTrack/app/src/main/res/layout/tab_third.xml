@@ -1,0 +1,152 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:gravity="center_horizontal"
+	android:background="@null">
+
+
+	<TextView 
+		style="@style/TvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_gravity="left"
+		android:layout_marginBottom="5dp"
+		android:textColor="@color/black"
+		android:text="控制状态监测"/>
+
+
+	<com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/lineChart"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+
+
+	<TextView 
+		style="@style/TvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_gravity="left"
+		android:paddingBottom="5dp"
+		android:textColor="@color/black"
+		android:text="摄像头云台角度"/>
+
+
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+
+		<TextView
+			android:id="@+id/angleh_tv"
+			style="@style/TvStyle"	
+			android:layout_weight="1"
+			android:text="水平角:0°"/>
+
+		<TextView
+			android:id="@+id/anglev_tv"
+			style="@style/TvStyle"	
+			android:layout_weight="1"
+			android:text="垂直角:0°"/>
+
+	</LinearLayout>
+
+
+	<TextView 
+		style="@style/TvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_gravity="left"
+		android:paddingBottom="5dp"
+		android:textColor="@color/black"
+		android:text="电机控制量"/>
+
+
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+
+		<TextView
+			android:id="@+id/left_val_tv"
+			style="@style/TvStyle"	
+			android:layout_weight="1"
+			android:text="左电机:0"/>
+
+		<TextView
+			android:id="@+id/right_val_tv"
+			style="@style/TvStyle"	
+			android:layout_weight="1"
+			android:text="右电机:0"/>
+
+	</LinearLayout>
+
+
+	<TextView 
+		style="@style/TvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_gravity="left"
+
+		android:paddingBottom="5dp"
+		android:textColor="@color/black"
+		android:text="追踪物体信息"/>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="80dp"
+		android:orientation="vertical"
+		android:gravity="center_horizontal">
+
+		<TextView 
+			android:id="@+id/track_tv"
+			style="@style/TvStyle"	
+			android:layout_marginTop="10dp"
+			android:visibility="visible"
+			android:text="追踪未开启"/>
+
+		<LinearLayout
+			android:id="@+id/track_linear"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:visibility="gone">
+
+			<LinearLayout
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:orientation="vertical"
+				android:gravity="center_horizontal">
+
+				<TextView
+					android:id="@+id/xpos_tv"
+					style="@style/TvStyle"	
+					android:text="x坐标:0"/>
+
+				<TextView
+					android:id="@+id/ypos_tv"
+					style="@style/TvStyle"	
+					android:text="y坐标:0"/>
+
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:orientation="vertical"
+				android:gravity="center_horizontal">
+
+				<TextView
+					android:id="@+id/width_tv"
+					style="@style/TvStyle"	
+					android:text="宽度:0"/>
+
+				<TextView
+					android:id="@+id/height_tv"
+					style="@style/TvStyle"	
+					android:text="高度:0"/>
+
+			</LinearLayout>
+
+		</LinearLayout>
+
+	</LinearLayout>
+	
+</LinearLayout>

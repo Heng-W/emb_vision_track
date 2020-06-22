@@ -1,0 +1,146 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:gravity="center_horizontal"
+	android:background="@null">
+
+
+	<TextView 
+		style="@style/TitleTvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_gravity="left"
+		android:paddingBottom="5dp"
+		android:text="用户信息"/>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical">
+
+		<TextView 
+			style="@style/ParamTvStyle"	
+			android:id="@+id/login_user_id"
+			android:textSize="16sp"
+			android:layout_marginTop="10dp"
+			android:layout_gravity="left"
+			android:paddingLeft="30dp"
+			android:paddingBottom="10dp"
+			android:textColor="@color/sky_blue"
+			android:text="用户ID: 0"/>
+
+		<TextView 
+			style="@style/ParamTvStyle"	
+			android:id="@+id/login_user_name"
+			android:textSize="16sp"
+			android:layout_gravity="left"
+			android:paddingLeft="30dp"
+			android:paddingBottom="10dp"
+			android:textColor="@color/sky_blue"
+			android:text="用户名: root"/>
+
+	</LinearLayout>
+
+
+	<TextView 
+		style="@style/TitleTvStyle"	
+		android:id="@+id/client_cnt"
+		android:layout_gravity="left"
+		android:paddingBottom="10dp"
+		android:text="当前用户数量: 1"/>
+
+
+	<TextView 
+		style="@style/TitleTvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_gravity="left"
+		android:paddingBottom="5dp"
+		android:text="广播信息"/>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical">
+
+		<EditText
+			android:id="@+id/client_msg_edit"
+			android:layout_width="180dp"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="30dp"
+			android:layout_marginRight="10dp"
+			android:hint=""
+			android:editable="true"
+			android:maxLength="100"   
+			android:lines="1"
+			android:text=""
+			android:textSize="20sp"  
+			android:inputType="text"/>
+
+		<Button
+			android:id="@+id/send_msg_btn"
+			style="@style/BtnStyle"	
+			android:textSize="16sp"  
+			android:text="发送"/>
+
+	</LinearLayout>
+
+
+	<TextView 
+		style="@style/TitleTvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_gravity="left"
+		android:paddingBottom="5dp"
+		android:text="Linux系统命令"/>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical">
+
+		<EditText
+			android:id="@+id/cmd_edit"
+			android:layout_width="180dp"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="30dp"
+			android:layout_marginRight="10dp"
+			android:hint=""
+			android:editable="true"
+			android:maxLength="20"   
+			android:lines="1"
+			android:text=""
+			android:textSize="20sp"  
+			android:inputType="text"/>
+
+		<Button
+			android:id="@+id/cmd_btn"
+			style="@style/BtnStyle"
+			android:textSize="16sp"  
+			android:text="发送"/>
+
+	</LinearLayout>
+
+
+	<TextView 
+		style="@style/TitleTvStyle"	
+		android:layout_marginTop="10dp"
+		android:layout_gravity="left"
+		android:paddingBottom="5dp"
+		android:text="执行结果"/>
+
+
+	<TextView
+		android:id="@+id/cmd_result_tv"
+		style="@style/TvStyle"	
+		android:textSize="14sp"  
+		android:layout_marginTop="10dp"
+		android:gravity="left"
+		android:text=""/>
+
+	
+</LinearLayout>

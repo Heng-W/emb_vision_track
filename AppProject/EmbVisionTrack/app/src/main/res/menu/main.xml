@@ -1,0 +1,41 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_exit"
+		android:orderInCategory="100"
+		app:showAsAction="never"
+		android:title="@string/exit_item"/>
+
+	<item
+        android:id="@+id/action_reset"
+		android:orderInCategory="99"
+		app:showAsAction="never"
+        android:title="@string/reset_item"/>
+
+	<item
+        android:id="@+id/action_camera_reset"
+		android:orderInCategory="98"
+		app:showAsAction="never"
+        android:title="@string/camera_reset_item"/>
+
+	<item
+        android:id="@+id/action_track_mode"
+		android:orderInCategory="100"
+		app:showAsAction="never"
+        android:title="切换追踪模式"/>
+
+	<item
+        android:id="@+id/action_halt"
+		android:orderInCategory="100"
+		app:showAsAction="never"
+        android:title="关机"/>
+
+	<item
+        android:id="@+id/action_reboot"
+		android:orderInCategory="100"
+		app:showAsAction="never"
+        android:title="重启"/>
+	
+
+</menu>

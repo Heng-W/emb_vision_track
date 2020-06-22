@@ -1,0 +1,145 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/window_bg</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+		<item name="android:windowBackground">@color/window_bg</item>
+		<item name="android:navigationBarColor">@color/window_bg</item>
+		<item name="android:popupMenuStyle">@style/PopMenuStyle</item>
+		<item name="android:dropDownListViewStyle">@style/PopMenuDivider</item>
+		<item name="android:textAppearanceSmallPopupMenu">@style/PopMenuText</item>
+		<item name="android:textAppearanceLargePopupMenu">@style/PopMenuText</item>
+	</style>
+
+
+
+    <!--popMenu的Style-->
+    <style name="PopMenuStyle">
+        <item name="android:popupBackground">@color/nav_bar</item><!-- popMenu的背景色-->
+    </style>
+
+    <!--popMenu的字体颜色-->
+    <style name="PopMenuText">
+        <item name="android:textColor">@color/stone_blue</item>
+		<item name="android:textStyle">italic|bold</item>	     
+	</style>
+
+    <!--popMenu分割线的颜色-->
+    <style name="PopMenuDivider">
+        <item name="android:divider">@color/sky_blue</item>
+        <item name="android:dividerHeight">0.1dp</item>
+    </style>
+
+	<style name="TvStyle">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:gravity">center</item>
+		<item name="android:textColor">@color/sky_blue</item>
+		<item name="android:textSize">20sp</item>
+	</style>
+
+	<style name="BtnStyle">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:paddingLeft">10dp</item>
+		<item name="android:paddingRight">10dp</item>
+		<item name="android:background">@drawable/shape_btn</item>
+		<item name="android:textColor">@color/sky_blue</item>
+		<item name="android:textSize">16sp</item>
+	</style>
+
+
+	<style name="ImgBtnStyle" >
+		<item name="android:background">@null</item>
+		<item name="android:scaleType">center</item>
+		<item name="android:layout_width">50dp</item>
+		<item name="android:layout_height">50dp</item>
+	</style>
+
+	<style name="ImgViewStyle" >
+		<item name="android:background">@null</item>
+		<item name="android:scaleType">fitCenter</item>
+		<item name="android:layout_width">36dp</item>
+		<item name="android:layout_height">36dp</item>
+	</style>
+
+
+
+	<style name="BottomIconStyle" >
+		<item name="android:background">@null</item>
+		<item name="android:scaleType">centerInside</item>
+		<item name="android:layout_width">28dp</item>
+		<item name="android:layout_height">28dp</item>
+	</style>
+
+	<style name="BottomSelStyle" >
+		<item name="android:layout_width">0dp</item>
+		<item name="android:layout_height">match_parent</item>
+		<item name="android:layout_weight">1</item>
+		<item name="android:gravity">center</item>
+		<item name="android:background">@null</item>
+		<item name="android:orientation">vertical</item>
+	</style>
+
+	<style name="BottomTvStyle" >
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:textColor">@color/dark_grey</item>
+		<item name="android:textSize">15sp</item>
+	</style>
+
+
+	<style name="TitleTvStyle" parent="TvStyle">
+		<item name="android:textColor">@color/black</item>
+		<item name="android:textSize">18sp</item>
+		<item name="android:layout_gravity">left</item>
+	</style>
+
+
+	<style name="ParamTvStyle" parent="TvStyle">
+		<item name="android:textColor">@color/black</item>
+		<item name="android:textSize">14sp</item>
+		<item name="android:gravity">left</item>
+	</style>
+
+	<style name="TipTvStyle" parent="TvStyle">
+		<item name="android:textSize">14sp</item>
+		<item name="android:gravity">center</item>
+	</style>
+
+	<style name="ParamEditStyle">
+		<item name="android:layout_width">60dp</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:hint"></item>
+		<item name="android:editable">true</item>
+		<item name="android:maxLength">8</item>
+		<item name="android:lines">1</item>
+		<item name="android:textSize">14sp</item>
+		<item name="android:inputType">numberSigned|numberDecimal</item>
+	</style>
+
+
+	<!-- popup window 显示消失动画-->
+    <style name="PopWindowAnimStyle">
+        <item name="android:windowShowAnimation">@anim/dialog_enter</item>
+        <!-- 指定显示的动画xml  -->
+        <item name="android:windowHideAnimation">@anim/dialog_exit</item>
+        <!-- 指定消失的动画xml  -->
+    </style>
+
+	<!-- loading dialog -->
+    <style name="MyDialogStyle">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+	
+</resources>

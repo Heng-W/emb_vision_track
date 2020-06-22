@@ -1,0 +1,57 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+	android:gravity="center_vertical"
+	android:background="@color/nav_bar"
+    android:orientation="horizontal">
+
+	
+	<LinearLayout
+		android:id="@+id/first_sel"
+		style="@style/BottomSelStyle">
+
+		<TextView
+			android:id="@+id/first_tv"
+			style="@style/BottomTvStyle"
+			android:text="@string/first_label"/>
+
+  	</LinearLayout>
+	
+
+	<LinearLayout
+		android:id="@+id/second_sel"
+		style="@style/BottomSelStyle">
+
+		<TextView
+			android:id="@+id/second_tv"
+			style="@style/BottomTvStyle"
+			android:text="@string/second_label"/>
+		
+  	</LinearLayout>
+
+	
+	<LinearLayout
+		android:id="@+id/third_sel"
+		style="@style/BottomSelStyle">
+
+		<TextView
+			android:id="@+id/third_tv"
+			style="@style/BottomTvStyle"
+			android:text="@string/third_label"/>
+
+  	</LinearLayout>
+
+
+	<LinearLayout
+		android:id="@+id/fourth_sel"
+		style="@style/BottomSelStyle">
+
+		<TextView
+			android:id="@+id/fourth_tv"
+			style="@style/BottomTvStyle"
+			android:text="@string/fourth_label"/>
+
+  	</LinearLayout>
+
+
+</LinearLayout>

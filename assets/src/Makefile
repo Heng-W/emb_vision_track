@@ -1,0 +1,2 @@
+
+include $(TOPDIR)/common.mk

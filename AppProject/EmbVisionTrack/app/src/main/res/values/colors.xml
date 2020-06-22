@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+	<color name="white">#ffffff</color>
+	<color name="red">#ff0000</color>
+	<color name="green">#00ff00</color>
+	<color name="blue">#0000ff</color>
+	<color name="black">#000000</color>
+	<color name="yellow">#ffff00</color>
+	<color name="sky_blue">#3299cc</color>
+	<color name="stone_blue">#007fff</color>
+	<color name="deep_blue">#4267f4</color>
+	<color name="light_grey_white">#eeeeee</color>
+	<color name="light_grey">#DCDCDC</color>
+	<color name="grey">#C0C0C0</color>
+	<color name="dark_grey">#888888</color>
+	<color name="btn">#668fcc</color>
+	<color name="primary_dark">#4298f4</color>
+	<color name="primary">#4298f4</color>
+	<color name="nav_bar">#fafafa</color>
+	<color name="window_bg">#c9d9d9</color>
+
+	<color name="cu_green">#527f76</color>
+	<color name="ziLuoLan">#4f2f4f</color>
+	<color name="he_red">#8e236b</color>
+	<color name="shanHu_red">#ff7f00</color>
+	<color name="gang_blue">#236b8e</color>
+	<color name="ziLuoLan_red">#cc3299</color>
+	<color name="light_gold_yellow">#cfb58b</color>
+	<color name="qiaokeli">#5c3317</color>
+	<color name="light_purple">#db70db</color>
+	<color name="mid_blue">#3232cd</color>
+	<color name="blue_purple">#9f5f9f</color>
+	<color name="yellow_green">#99cc32</color>
+	<color name="orange_red">#ff2400</color>
+	<color name="orange">#ff7f00</color>
+	<color name="liang_gold">#d9d919</color>
+	<color name="cu">#b87333</color>
+	<color name="qing_cu">#8c7853</color>
+	<color name="deep_brown">#5c4033</color>
+	<color name="tree_green">#238e23</color>
+	<color name="brown_he">#d89370</color>
+	<color name="brown">#a67d3d</color>
+	<color name="deep_green">#2f4f2f</color>
+	<color name="gold">#cd7f32</color>
+	<color name="xing_red">#bc1717</color>
+	<color name="mai_yellow">#d8d8bf</color>
+	<color name="qing">#00ffff</color>
+	<color name="purple_blue">#42426f</color>
+	<color name="yellow_cu">#b5a642</color>
+	<color name="deep_purple">#8f1f78</color>
+	<color name="niHong_pink">#ff6ec7</color>
+	<color name="yan_pink">#ff1cae</color>
+	<color name="pink">#fe8db1</color>
+	<color name="qing_yellow">#93d870</color>
+	<color name="xian_yellow">#d8d870</color>
+	<color name="tu_yellow">#9f9f5f</color>
+	<color name="ju_yellow">#e47833</color>
+	<color name="light_stone_blue">#adeaea</color>
+	<color name="light_blue">#a0d0f0</color>
+	<color name="light_blue_green">#70d8d8</color>
+	
+
+</resources>

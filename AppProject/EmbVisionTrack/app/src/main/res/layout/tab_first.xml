@@ -1,0 +1,257 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+    android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:gravity="center_horizontal"
+	android:background="@null">
+
+
+	<TextView 
+		android:id="@+id/drive_mode"
+		style="@style/TvStyle"
+		android:layout_marginTop="10dp"
+		android:text="模式：手动驾驶"/>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical"
+		android:layout_marginTop="10dp">
+
+		<pers.hw.evtrack.view.SteerView
+			android:id="@+id/steer"
+			android:layout_width="200dp"
+			android:layout_height="150dp"/>
+
+		<ImageButton
+			android:id="@+id/ahead_btn"
+			android:src="@drawable/ahead"
+			style="@style/ImgBtnStyle"
+			android:layout_width="80dp"
+			android:layout_height="80dp"
+			android:scaleType="fitCenter"/>
+
+		<ImageButton
+			android:id="@+id/reverse_btn"
+			android:src="@drawable/reverse"
+			style="@style/ImgBtnStyle"
+			android:layout_width="80dp"
+			android:layout_height="80dp"
+			android:scaleType="fitCenter"/>
+
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical">
+
+		<TextView 
+			android:id="@+id/speed_tv"
+			style="@style/TvStyle"
+			android:text="速度：20%"/>
+
+		<SeekBar
+			android:id="@+id/speed_bar"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:maxHeight="2dp"
+			android:minHeight="2dp"
+			android:paddingBottom="10dp"
+			android:paddingLeft="60dp"
+			android:paddingRight="60dp"
+			android:paddingTop="10dp"/>
+
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center">
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:gravity="center">
+
+			<ImageButton
+				android:id="@+id/drive_mode_btn"
+				android:src="@drawable/mode_chg"
+				style="@style/ImgBtnStyle"
+				android:layout_width="50dp"
+				android:layout_height="50dp"
+				android:scaleType="fitCenter"/>
+
+			<TextView 
+				style="@style/TipTvStyle"
+				android:text="模式切换"/>
+
+		</LinearLayout>
+
+		<!--Button
+		android:id="@+id/drive_mode_btn"
+		style="@style/BtnStyle"
+
+		android:text="模式切换"/-->
+
+		<View
+			android:layout_width="30dp"
+			android:layout_height="0dp"/>
+
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:gravity="center">
+
+
+			<ImageButton
+				android:id="@+id/motor_stop_btn"
+				android:src="@drawable/stop"
+				style="@style/ImgBtnStyle"
+				android:layout_width="50dp"
+				android:layout_height="50dp"
+				android:scaleType="fitCenter"/>
+
+			<TextView 
+				style="@style/TipTvStyle"
+				android:text="急停"/>
+
+		</LinearLayout>
+
+
+	</LinearLayout>
+
+
+	<TextView
+		style="@style/TvStyle"
+		android:text="PID参数编辑"
+		android:layout_gravity="left"
+		android:layout_marginTop="20dp"	/>
+
+	<TableLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+		<TableRow 
+			android:gravity="center">
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:textSize="14sp"  
+				android:layout_marginRight="20dp"
+				android:text="舵机(水平)"/>
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:text="P:"/>
+
+			<EditText
+				android:id="@+id/edit_servo1_p"
+				style="@style/ParamEditStyle"/>
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:text="D:"/>
+
+			<EditText
+				android:id="@+id/edit_servo1_d"
+				style="@style/ParamEditStyle"/>
+
+		</TableRow>
+
+
+		<TableRow 
+			android:gravity="center">
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:layout_marginRight="20dp"
+				android:text="舵机(垂直)"/>
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:text="P:"/>
+
+			<EditText
+				android:id="@+id/edit_servo2_p"
+				style="@style/ParamEditStyle"/>
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:text="D:"/>
+
+			<EditText
+				android:id="@+id/edit_servo2_d"
+				style="@style/ParamEditStyle"/>
+
+		</TableRow>
+
+
+		<TableRow 
+			android:gravity="center">
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:layout_marginRight="20dp"
+				android:text="方向控制"/>
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:text="P:"/>
+
+			<EditText
+				android:id="@+id/edit_dir_p"
+				style="@style/ParamEditStyle"/>
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:text="D:"/>
+
+			<EditText
+				android:id="@+id/edit_dir_d"
+				style="@style/ParamEditStyle"/>
+
+		</TableRow>
+
+
+		<TableRow
+			android:gravity="center">
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:layout_marginRight="20dp"
+				android:text="距离控制"/>
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:text="P:"/>
+
+			<EditText
+				android:id="@+id/edit_dist_p"
+				style="@style/ParamEditStyle"/>
+
+			<TextView 
+				style="@style/ParamTvStyle"
+				android:text="I:"/>
+
+			<EditText
+				android:id="@+id/edit_dist_i"
+				style="@style/ParamEditStyle"/>
+
+		</TableRow>
+
+	</TableLayout>
+
+
+</LinearLayout>
+

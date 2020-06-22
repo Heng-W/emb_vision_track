@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <declare-styleable name="RoundMenuView">
+		<attr name="hasCenter" format="boolean" />
+		<attr name="menuCnt" format="integer"/>
+		<attr name="angleStart" format="integer"/>
+		<attr name="centerRadiusCoff" format="float"/>
+		<attr name="strokeWidth" format="float"/>
+		<attr name="strokeColor" format="color" />
+		<attr name="fillColor" format="color" />
+		<attr name="selectColor" format="color" />
+		<attr name="centerFillColor" format="color" />
+		<attr name="centerStrokeColor" format="color" />
+		<attr name="markColor" format="color" />
+		<attr name="markLCoff" format="float" />
+		<attr name="markSCoff" format="float" />
+		
+    </declare-styleable>
+
+</resources>
