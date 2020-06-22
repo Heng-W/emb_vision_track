@@ -24,6 +24,7 @@
 #include "image_packet.h"
 #include "yuyv2bgr.h"
 #include "locate.h"
+#include "../comm/server.h"
 
 
 
