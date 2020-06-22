@@ -17,8 +17,8 @@ public:
     void closeDevice();
 
 protected:
-    const std::string deviceName_;
-    int deviceFd_;
+    const std::string deviceName_;//设备名称
+    int deviceFd_;//文件描述符
 
 };
 

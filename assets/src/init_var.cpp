@@ -1,10 +1,7 @@
 
 #include <string>
 #include <fstream>
-
 #include <sstream>
-
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -28,6 +25,7 @@ extern int pickTimeOutDelay;
 
 }
 
+//分割字符串
 vector<string> splitString(const string& in, const string& delim)
 {
     vector<string> ret;
@@ -83,9 +81,8 @@ void initVar()
 
     stringstream stream;
 
-
     ifstream file;
-    file.open("var.conf", ios::in);
+    file.open("var.conf", ios::in);//读取配置文件
     string str;
 
     while (getline(file, str))
@@ -97,6 +94,7 @@ void initVar()
         {
             continue;
         }
+		//利用hash实现字符串switch
         switch (hash_(ret[0].c_str()))
         {
             case "motorDeadValue0"_hash:
@@ -187,7 +185,6 @@ void initVar()
                 stream.clear();
 
                 break;
-
 
 
             default:

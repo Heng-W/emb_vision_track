@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <iostream>
+
 #include "comm/server.h"
 #include "vision/event.h"
 #include "control/event.h"
@@ -22,18 +23,18 @@ void initVar();
 
 static void sleepMs(unsigned long ms);
 
-Server server;
-
 
 int main(int argc, char* argv [])
 {
-    initVar();
+    initVar();//设置变量初值
 
-    control::Event controlEvent(server);
-    vision::Event visionEvent(server);
+	Server server;
+	
+    control::Event controlEvent(server);//设备控制事件
+    vision::Event visionEvent(server);//视觉处理事件
     sleepMs(1000);
 
-    server.startup();
+    server.startup();//启动服务器
     sleepMs(1000);
 
     return 0;

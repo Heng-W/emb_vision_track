@@ -1,14 +1,11 @@
 
 #include "control.h"
-
 #include <fcntl.h>
-
 #include <unistd.h>
+
 
 namespace EVTrack
 {
-
-
 
 
 Control::Control(std::string deviceName, bool openFlag):

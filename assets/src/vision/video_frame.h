@@ -22,12 +22,14 @@ public:
     {
         return frameBGR_;
     }
+	
+	//原始YUYV格式转换成BGR图像
     void convertImage(void* rawImage);
 
 
 private:
-    cv::Mat frameYUYV_;
-    cv::Mat frameBGR_;
+    cv::Mat frameYUYV_;//YUYV图像帧
+    cv::Mat frameBGR_;//BGR图像帧
     //cv::Mat frame_;
 
 };

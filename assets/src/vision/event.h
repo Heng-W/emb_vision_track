@@ -2,10 +2,12 @@
 #define EVT_VISION_EVENT_H
 
 #include <pthread.h>
-#include "../comm/server.h"
+
 
 namespace EVTrack
 {
+	
+class Server;
 
 namespace vision
 {
@@ -19,9 +21,9 @@ public:
     void packetEventLoop();
 
 private:
-    pthread_t pickThread_;
-    pthread_t disposeThread_;
-    pthread_t packetThread_;
+    pthread_t pickThread_;//图像采集线程
+    pthread_t disposeThread_;//图像处理线程
+    pthread_t packetThread_;//图像压缩打包线程
     Server& server_;
 
 

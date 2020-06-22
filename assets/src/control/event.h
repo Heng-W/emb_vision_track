@@ -17,10 +17,10 @@ class Event
 {
 public:
     Event(Server& server);
-    void eventLoop();
+    void eventLoop();//事件循环
 private:
     Server& server_;
-    pthread_t thread_;
+    pthread_t thread_;//设备控制线程（周期100ms）
     FieldControl fieldControl_;
     MotionControl motionControl_;
 

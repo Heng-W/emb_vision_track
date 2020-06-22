@@ -4,10 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <fstream>
-
 #include <sstream>
-
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -21,7 +18,7 @@ namespace EVTrack
 
 vector<string> splitString(const string& in, const string& delim);
 
-
+//通过用户名验证账户
 int checkAccountByName(uint8 type, char* name, char* pwd, uint16* userID)
 {
 
@@ -64,7 +61,7 @@ int checkAccountByName(uint8 type, char* name, char* pwd, uint16* userID)
 
 }
 
-
+//通过ID验证账户
 int checkAccountById(int id, char* pwd, char* name)
 {
 

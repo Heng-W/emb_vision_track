@@ -9,6 +9,7 @@
 namespace EVTrack
 {
 
+//数据包封装类
 class Packet
 {
 public:
@@ -19,11 +20,11 @@ public:
         return head_;
     }
 
-    void pack();
-    uint16 getBodyLength();
-    uint16 getLength();
+    void pack();//写入长度，打包封装
+    uint16 getBodyLength();//获取消息体长度
+    uint16 getLength();//获取总长度
 
-    void writeHeader(Command cmd);
+    void writeHeader(Command cmd);//命令号写入包头
     void writeString(std::string s);
     void writeString(char* s);
 
@@ -45,13 +46,13 @@ public:
     void writeInt64(int64 num);
 
 private:
-    uint8* head_;
-    uint8* tail_;
-
+    uint8* head_;//包头指针
+    uint8* tail_;//指向当前写入位置
 
 };
 
 
+//数据包解析类
 class PacketReader
 {
 
@@ -59,10 +60,10 @@ public:
 
     PacketReader(uint8* msg);
 
-    bool isHeader();
+    bool isHeader();//验证是否为包头
 
     uint16 getLength();
-    void reset();
+    void reset();//读指针复位
 
     std::string readString();
 
@@ -81,8 +82,8 @@ public:
     int64 readInt64();
 
 private:
-    uint8* head_;
-    uint8* tail_;
+    uint8* head_;//包头指针
+    uint8* tail_;//指向当前读取位置
 
 };
 

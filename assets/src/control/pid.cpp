@@ -13,7 +13,6 @@ PID::PID(float setpoint, float dt, float kp, float ki, float kd):
     dt_(dt),
     pidParams_{kp, ki, kd},
     lastError_(0),
-    errorMin_(0),
     integral_(0),
     output_(0),
     lastOutput_(0),
