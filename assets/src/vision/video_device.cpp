@@ -63,13 +63,11 @@ int VideoDevice::updateFrame()
     {
         if (errno == EAGAIN)
         {
-            cout << "u";
             return -2;
         }
         perror("VIDIOC_DQBUF");
         return -1;
     }
-    cout << endl;
     // memcpy(image.data,(buffers_+vbuf.index)->start,(buffers_+vbuf.index)->length);
     //yuyv2bgr(IMAGE_W, IMAGE_H, rawImage, image_);
     if (pDisposeRawImage_ != NULL)

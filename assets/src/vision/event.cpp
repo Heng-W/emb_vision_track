@@ -130,7 +130,6 @@ Event::Event(Server& server):
 //cv::Mat frame;
 clock_t begin, end;
 clock_t tmp1, tmp2, tmp3;
-static int tim_cnt;
 int pickDelay = 100;
 int pickTimeOutDelay = 50;
 cv::Mat grayImage;
@@ -227,7 +226,7 @@ void Event::disposeEventLoop()
             begin = clock();
             result = tracker.update(grayImage);
             end = clock();
-            std::cout << "track: " << (end - begin) << " / " << CLOCKS_PER_SEC << std::endl;
+//          std::cout << "track: " << (end - begin) << " / " << CLOCKS_PER_SEC << std::endl;
         }
 
         disposeOverFlag = true;
