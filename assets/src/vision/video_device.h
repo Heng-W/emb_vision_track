@@ -23,34 +23,34 @@ public:
         pDisposeRawImage_ = pfun;
     }
 
-	//更新读取一帧
+    //更新读取一帧
     int updateFrame();
 
     int openDevice();
     void closeDevice();
 
-	//摄像头参数信息
+    //摄像头参数信息
     void dispCapInfo();
 
-	//摄像头工作模式
+    //摄像头工作模式
     void setFormat();
     void dispFormat();
 
-	//视频流参数设置，设定帧率
+    //视频流参数设置，设定帧率
     void setStreamParm();
 
-	//图像缓冲区管理
+    //图像缓冲区管理
     void requestBuffer();
     void releaseBuffer();
 
-	//视频流控制
+    //视频流控制
     void startStream();
     void stopStream();
 
     int init();
     void release();
 
-	//图像采集像素
+    //图像采集像素
     static const int IMAGE_W = 320;
     static const int IMAGE_H = 240;
 

@@ -20,19 +20,19 @@ class ImagePacket
 public:
     ImagePacket();
 
-	//生成图像数据包
+    //生成图像数据包
     void makePacket(Server& server);
 
-	//编码压缩图像为JPEG格式
+    //编码压缩图像为JPEG格式
     void encodeImage(cv::Mat& frame);
     
-	//图像数据包更新
+    //图像数据包更新
 	int update();
 
-	//生成目标位置数据包
+    //生成目标位置数据包
     void makeLocatePacket();
 
-	//一帧图像数据是否发送完成
+    //一帧图像数据是否发送完成
     bool isOver()
     {
         return packetIdx_ + 1 == packetCnt_;

@@ -18,10 +18,10 @@ public:
 
     KCFTracker(bool useMultiScale = false);
 
-	//设置追踪模式（单尺度或多尺度）
+    //设置追踪模式（单尺度或多尺度）
     void setTrackMode(bool useMultiScale);
 
-	//重新设置初始帧
+    //重新设置初始帧
     void reset();
     void reset(const cv::Rect& roi, cv::Mat& image);
 	

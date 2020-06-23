@@ -23,7 +23,7 @@ public:
         return frameBGR_;
     }
 	
-	//原始YUYV格式转换成BGR图像
+    //原始YUYV格式转换成BGR图像
     void convertImage(void* rawImage);
 
 

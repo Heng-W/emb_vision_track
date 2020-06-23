@@ -28,53 +28,53 @@ class Server
 public:
     Server();
 
-	//启动服务器
+    //启动服务器
     void startup();
 
-	//获取运行状态
+    //获取运行状态
     bool isRunning()
     {
         return runFlag_;
     }
 
-	//对用户添加或移除EPOLL监听
+    //对用户添加或移除EPOLL监听
     void addEpollEvent(EpollData* data);
     void removeEpollEvent(EpollData* data);
 
-	//用户连接断开后，解除内存引用并从用户列表中移除
+    //用户连接断开后，解除内存引用并从用户列表中移除
     void resetDataPtr(EpollData* data);
 
-	//验证账户
+    //验证账户
     bool checkAccount(int sockfd);
     
-	//新用户连接事件
+    //新用户连接事件
 	void acceptEvent();
 
-	//接收消息处理
+    //接收消息处理
     void recvMessage(EpollData* data, Command& cmd, uint16& len);
 
-	//事件主循环，监听触发的EPOLL事件
+    //事件主循环，监听触发的EPOLL事件
     void epollEventLoop();
 
-	//图像数据包群发
+    //图像数据包群发
     void imageEvent(EpollData* data);
 
-	//通过ID获取用户信息
+    //通过ID获取用户信息
     std::shared_ptr<EpollData> getClientByUserID(uint16 userID);
 
-	//注册EPOLLOUT事件
+    //注册EPOLLOUT事件
     int enrollOutEvent();
     int enrollOutEvent(EpollData* data);
 
-	//写消息
+    //写消息
     void writeCmd(Command cmd);
     void writeCmd(Command cmd, std::string s);
     void sendMessage(int sockfd);
 
-	//向所有用户发送数据包
+    //向所有用户发送数据包
     void sendToAllClients(Packet& packet);
 
-	//向除自己以外的其它用户发送数据包
+    //向除自己以外的其它用户发送数据包
     void sendToOtherClients(Packet& packet, uint16 userID);
 
 
