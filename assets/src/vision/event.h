@@ -6,7 +6,7 @@
 
 namespace EVTrack
 {
-	
+
 class Server;
 
 namespace vision

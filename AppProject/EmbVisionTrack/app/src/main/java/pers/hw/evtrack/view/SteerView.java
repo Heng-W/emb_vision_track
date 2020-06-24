@@ -47,12 +47,12 @@ public class SteerView extends View {
         this(context, null);
 
     }
-	
+
     public SteerView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
 
     }
-	
+
     public SteerView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
@@ -100,7 +100,7 @@ public class SteerView extends View {
         Path path = new Path();
         // path.moveTo(centerX-radius,centerY);
         path.addCircle(centerX, centerY, radius, Path.Direction.CW);
-       
+
         float x1 = (float)(centerX - 0.99 * radius);
         float y1 = (float)(centerY - 0.06 * radius);
 
@@ -115,7 +115,7 @@ public class SteerView extends View {
 
         path.moveTo(refX, refY);
         path.quadTo(centerX, (float)(centerY + centerRadius * 2.2), 2 * centerX - refX, refY);
-      
+
         path.moveTo((float)(centerX - centerRadius * 0.8), (float)(centerY + 0.4 * centerRadius));
         path.lineTo((float)(centerX - 0.25 * centerRadius), centerY + radius);
 
@@ -210,7 +210,7 @@ public class SteerView extends View {
         return angle;
 
     }
-	
+
 
 }
 

@@ -27,7 +27,7 @@ public:
         pidParams_[1] = ki;
         pidParams_[2] = kd;
     }
-	
+
     //获取误差
     float getError(float processVal)
     {
@@ -39,13 +39,13 @@ public:
     {
         outputLimit_ = outputLimit;
     }
-	
+
     //积分限幅
     void setIntegralLimit(float integralLimit)
     {
         integralLimit_ = integralLimit;
     }
-	
+
     //积分分离，防止饱和
     void setIntegralSeparation(float val)
     {
@@ -57,7 +57,7 @@ public:
     {
         divideCnt_ = val;
     }
-	
+
     //参数复位
     void reset();
 

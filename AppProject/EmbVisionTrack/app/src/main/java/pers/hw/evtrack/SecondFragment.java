@@ -102,7 +102,7 @@ public class SecondFragment extends Fragment {
 
 
                     if (client.trackFlag) {
-                  
+
                         imageSurface.showResult(x, y, w, h);
                     }
                     break;

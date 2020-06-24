@@ -94,7 +94,7 @@ void initVar()
         {
             continue;
         }
-		//利用hash实现字符串switch
+        //利用hash实现字符串switch
         switch (hash_(ret[0].c_str()))
         {
             case "motorDeadValue0"_hash:

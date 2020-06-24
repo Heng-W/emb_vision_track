@@ -79,7 +79,7 @@ public class ImageConvert {
         else
             return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
-	
+
     /**
      * @brief 图片缩放
      */
@@ -103,7 +103,7 @@ public class ImageConvert {
         bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
         return baos.toByteArray();
     }
-	
+
     /**
      * @brief 把字节数组保存为一个文件
      */
