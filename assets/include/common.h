@@ -49,9 +49,9 @@ enum class Command
     restart_server,
     halt,
     reboot,
-	update_client_cnt,
-	logout,
-	update_pid
+    update_client_cnt,
+    logout,
+    update_pid
 };
 
 
