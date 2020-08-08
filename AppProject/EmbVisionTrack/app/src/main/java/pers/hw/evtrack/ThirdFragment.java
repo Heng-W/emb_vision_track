@@ -63,7 +63,7 @@ public class ThirdFragment extends Fragment {
                     leftValTv.setText("左电机:" + client.leftCtlVal);
                     rightValTv.setText("右电机:" + client.rightCtlVal);
 
-					addLineData();
+                    addLineData();
 
                     if (!client.trackFlag) {
                         trackTv.setVisibility(View.VISIBLE);//visible
@@ -118,7 +118,7 @@ public class ThirdFragment extends Fragment {
     private void initView() {
 
         chart = view.findViewById(R.id.lineChart);
-       
+
         lineNames.add("水平角偏移");
         lineNames.add("垂直角偏移");
 

@@ -48,7 +48,7 @@ public class MainActivity extends FragmentActivity {
     private Client client;
     private int idx = FRAG_MAX;
 
-	EditText userEdt;
+    EditText userEdt;
     EditText pwdEdt;
 
 
@@ -226,7 +226,7 @@ public class MainActivity extends FragmentActivity {
         client = new Client();
         client.setMainHandler(mHandler);
         initConnectView();
-       
+
     }
 
 
@@ -279,7 +279,7 @@ public class MainActivity extends FragmentActivity {
         overlay.clear();
     }
 
- 
+
 
     private void refreshConnectView() {
         client.isConnected = false;
@@ -296,7 +296,7 @@ public class MainActivity extends FragmentActivity {
         titleTv.setText(getResources().getString(R.string.app_name));
 
         setContentView(R.layout.connect);
-   
+
         initConnectView();
 
     }
@@ -457,7 +457,7 @@ public class MainActivity extends FragmentActivity {
 
     private boolean checkPort(String s) {
         return s.matches("[0-9]|[1-9]\\d{1,3}|[1-5]\\d{4}|6[0-5]{2}[0-3][0-5]");
-	}
+    }
 
     private void initServerAddrDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -616,7 +616,7 @@ public class MainActivity extends FragmentActivity {
                 String user = userEdt.getText().toString();
                 String pwd = pwdEdt.getText().toString();
                 int userID = client.userID;
-         
+
                 if (client.userType == 2) {
                     connectServer(0xfffe, null, null);
                     return;
@@ -775,7 +775,7 @@ public class MainActivity extends FragmentActivity {
 
     }
 
-	
+
 }
 
 

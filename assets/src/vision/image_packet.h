@@ -25,9 +25,9 @@ public:
 
     //编码压缩图像为JPEG格式
     void encodeImage(cv::Mat& frame);
-    
+
     //图像数据包更新
-	int update();
+    int update();
 
     //生成目标位置数据包
     void makeLocatePacket();

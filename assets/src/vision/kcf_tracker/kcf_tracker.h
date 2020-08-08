@@ -24,7 +24,7 @@ public:
     //重新设置初始帧
     void reset();
     void reset(const cv::Rect& roi, cv::Mat& image);
-	
+
     //初始化追踪器
     void init(const cv::Rect& roi, cv::Mat& image);
 

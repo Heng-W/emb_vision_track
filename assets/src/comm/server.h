@@ -46,9 +46,9 @@ public:
 
     //验证账户
     bool checkAccount(int sockfd);
-    
+
     //新用户连接事件
-	void acceptEvent();
+    void acceptEvent();
 
     //接收消息处理
     void recvMessage(EpollData* data, Command& cmd, uint16& len);

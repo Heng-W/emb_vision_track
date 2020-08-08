@@ -298,7 +298,7 @@ public class FirstFragment extends Fragment {
                 writeMotorVal();
             }
         });
-		
+
         speedAvg = speedBar.getProgress();
 
         ImageButton driveModeBtn = view.findViewById(R.id.drive_mode_btn);

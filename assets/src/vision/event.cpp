@@ -227,7 +227,7 @@ void Event::disposeEventLoop()
             begin = clock();
             result = tracker.update(grayImage);
             end = clock();
-//          std::cout << "track: " << (end - begin) << " / " << CLOCKS_PER_SEC << std::endl;
+            //          std::cout << "track: " << (end - begin) << " / " << CLOCKS_PER_SEC << std::endl;
         }
 
         disposeOverFlag = true;

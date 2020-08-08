@@ -17,8 +17,8 @@ import android.util.AttributeSet;
 public class ImageSurfaceView extends View {
 
     private int drawFlag = -1;
-    
-	private float xpos, ypos;
+
+    private float xpos, ypos;
     private float width, height;
 
     private float startx, starty;
@@ -45,7 +45,7 @@ public class ImageSurfaceView extends View {
     public ImageSurfaceView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
-	
+
     public ImageSurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
@@ -131,7 +131,7 @@ public class ImageSurfaceView extends View {
         //返回true表明处理方法已经处理该事务
         return true;
     }
-	
+
 
     @Override
     protected void onDraw(Canvas canvas) {

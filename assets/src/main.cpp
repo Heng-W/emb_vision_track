@@ -28,8 +28,8 @@ int main(int argc, char* argv [])
 {
     initVar();//设置变量初值
 
-	Server server;
-	
+    Server server;
+
     control::Event controlEvent(server);//设备控制事件
     vision::Event visionEvent(server);//视觉处理事件
     sleepMs(1000);

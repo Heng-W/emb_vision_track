@@ -62,7 +62,7 @@ public class RoundMenuView extends View {
         this(context, attrs, 0);
 
     }
-	
+
     public RoundMenuView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         final TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.RoundMenuView, defStyle, 0);

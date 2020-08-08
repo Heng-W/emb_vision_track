@@ -68,7 +68,7 @@ public class Client {
     private String ip = IP_DEFAULT;
     private int port = PORT_DEFAULT;
 
-	
+
     public Client() {
         handler = new Handler[MainActivity.FRAG_MAX];
     }
@@ -281,13 +281,13 @@ public class Client {
                     int cmd = pr.readUint16();
 
                     int len = pr.readUint16();
-           
+
 
                     if (len > 0) {
 
                         b = new byte[len];
 
-           
+
                         int readLen = 0;
                         int actualLen;
 
@@ -532,8 +532,8 @@ public class Client {
         }
 
     }
-	
-	
+
+
 }
 
 
