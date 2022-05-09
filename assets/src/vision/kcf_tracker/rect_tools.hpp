@@ -5,13 +5,8 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/imgproc/types_c.h"
 
-
-namespace EVTrack
+namespace evt
 {
-
-namespace kcf
-{
-
 
 namespace RectTools
 {
@@ -87,7 +82,7 @@ inline cv::Mat subwindow(const cv::Mat& in, const cv::Rect& window, int borderTy
 {
     cv::Rect cutWindow = window;
     RectTools::limit(cutWindow, in.cols, in.rows);
-    if (cutWindow.height <= 0 || cutWindow.width <= 0)assert(0); //return cv::Mat(window.height,window.width,in.type(),0) ;
+    if (cutWindow.height <= 0 || cutWindow.width <= 0) assert(0); //return cv::Mat(window.height,window.width,in.type(),0) ;
     cv::Rect border = RectTools::getBorder(window, cutWindow);
     cv::Mat res = in(cutWindow);
 
@@ -105,12 +100,8 @@ inline cv::Mat getGrayImage(cv::Mat img)
     return img;
 }
 
-}
+} // namespace RectTools
 
-}
+} // namespace evt
 
-}
-
-
-#endif
-
+#endif // EVT_RECT_TOOLS_HPP

@@ -18,12 +18,14 @@
 #include <linux/videodev2.h>
 #include <iostream>
 
-//#include "yuyv2bgr.h"
+#include "../util/logger.h"
+
+// #include "yuyv2bgr.h"
 
 using namespace std;
 
 
-namespace EVTrack
+namespace evt
 {
 
 struct VideoBuffer
@@ -34,65 +36,87 @@ struct VideoBuffer
 };
 
 
-//unsigned char VideoDevice::image_[IMAGE_W * IMAGE_H * 3];
-
-VideoDevice::VideoDevice(std::string deviceName, int bufferCnt, float fps):
-    deviceName_(deviceName),
-    bufferCnt_(bufferCnt),
-    fps_(fps),
-    deviceFd_(-1),
-    buffers_(NULL),
-    pDisposeRawImage_(NULL)
+VideoDevice::VideoDevice(const char* deviceName, int bufferCnt, float fps, bool mmap)
+    : deviceName_(deviceName),
+      bufferCnt_(bufferCnt),
+      fps_(fps),
+      deviceFd_(-1),
+      buffers_(nullptr),
+      mmap_(mmap),
+      quit_(false)
 {
+    if (openDevice())
+    {
+        setFormat();
+        imageSize_ = querySize();
+    }
 }
 
 
 VideoDevice::~VideoDevice()
 {
     release();
+    quit_ = true;
+    if (thread_) thread_->join();
+}
+
+void VideoDevice::start()
+{
+    thread_.reset(new std::thread([this]
+    {
+        init();
+        while (!quit_)
+        {
+            updateFrame();
+        }
+    }));
 }
 
 
 int VideoDevice::updateFrame()
 {
+    if (!mmap_)
+    {
+        int size = read(deviceFd_, buffers_->start, buffers_->length);
+        if (fetchFrameCallback_)
+        {
+            fetchFrameCallback_((char*)buffers_->start, imageSize_.width, imageSize_.height, ImageType::YUYV);
+        }
+        return size;
+    }
     struct v4l2_buffer vbuf;
     memset(&vbuf, 0, sizeof(vbuf));
     vbuf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     vbuf.memory = V4L2_MEMORY_MMAP;
     if (ioctl(deviceFd_, VIDIOC_DQBUF, &vbuf) < 0) //出列采集的帧缓冲
     {
-        if (errno == EAGAIN)
-        {
-            return -2;
-        }
         perror("VIDIOC_DQBUF");
         return -1;
     }
     // memcpy(image.data,(buffers_+vbuf.index)->start,(buffers_+vbuf.index)->length);
-    //yuyv2bgr(IMAGE_W, IMAGE_H, rawImage, image_);
-    if (pDisposeRawImage_ != NULL)
+    // yuyv2bgr(IMAGE_W, IMAGE_H, rawImage, image_);
+    if (fetchFrameCallback_)
     {
-        //(this->*pDisposeRawImage_)((buffers_ + vbuf.index)->start);
-        (*pDisposeRawImage_)((buffers_ + vbuf.index)->start);
+        fetchFrameCallback_((char*)(buffers_ + vbuf.index)->start, imageSize_.width, imageSize_.height, ImageType::YUYV);
     }
     if (ioctl(deviceFd_, VIDIOC_QBUF, &vbuf) < 0) //再将其入列
     {
         perror("VIDIOC_QBUF");
-        return 1;
+        return -1;
     }
     return 0;
 }
 
-int VideoDevice::openDevice()
+bool VideoDevice::openDevice()
 {
-    if (deviceFd_ >= 0) return 1;
-    deviceFd_ = open(deviceName_.c_str(), O_RDWR | O_NONBLOCK, 0);  //打开设备
+    assert(deviceFd_ < 0);
+    deviceFd_ = open(deviceName_.c_str(), O_RDWR, 0); // 打开设备
     if (deviceFd_ < 0)
     {
-        perror("Open camera");
-        return -1;
+        LOG(ERROR) << "open camera";
+        return false;
     }
-    return 0;
+    return true;
 }
 
 
@@ -119,21 +143,40 @@ void VideoDevice::dispCapInfo()
     cout << " capabilities: " << cap.capabilities << endl;
 }
 
+Size VideoDevice::querySize()
+{
+    struct v4l2_format fmt;
+    memset(&fmt, 0, sizeof(fmt));
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (ioctl(deviceFd_, VIDIOC_G_FMT, &fmt) < 0)
+    {
+        perror("VIDIOC_G_FMT");
+        return {0, 0};
+    }
+    return {(int)fmt.fmt.pix.width, (int)fmt.fmt.pix.height};
+}
+
 void VideoDevice::setFormat()
 {
     struct v4l2_format fmt;
     memset(&fmt, 0, sizeof(fmt));
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.width = IMAGE_W;
-    fmt.fmt.pix.height = IMAGE_H;
+    if (ioctl(deviceFd_, VIDIOC_G_FMT, &fmt) < 0)
+    {
+        perror("VIDIOC_G_FMT");
+        return;
+    }
+
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    // fmt.fmt.pix.width = kImageWidth;
+    // fmt.fmt.pix.height = kImageHeight;
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
     fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
     if (ioctl(deviceFd_, VIDIOC_S_FMT, &fmt) < 0)
     {
         perror("VIDIOC_S_FMT");
     }
-    //    rawImageSize_ = fmt.fmt.pix.bytesperline * fmt.fmt.pix.height; //计算图片大小
-
+    // rawImageSize_ = fmt.fmt.pix.bytesperline * fmt.fmt.pix.height; // 计算图片大小
 }
 
 
@@ -206,7 +249,7 @@ void VideoDevice::requestBuffer()
 
     buffers_ = (VideoBuffer*)calloc(bufferCnt_, sizeof(*buffers_));
     struct v4l2_buffer buf;
-    for (int i = 0; i < bufferCnt_; i++)
+    for (int i = 0; i < bufferCnt_; ++i)
     {
         memset(&buf, 0, sizeof(buf));
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -225,7 +268,7 @@ void VideoDevice::requestBuffer()
             perror("mmap");
             return;
         }
-        if (ioctl(deviceFd_, VIDIOC_QBUF, &buf) < 0) //申请到的缓冲进入队列
+        if (ioctl(deviceFd_, VIDIOC_QBUF, &buf) < 0) // 申请到的缓冲进入队列
         {
             perror("VIDIOC_QBUF");
         }
@@ -235,7 +278,7 @@ void VideoDevice::requestBuffer()
 void VideoDevice::releaseBuffer()
 {
     if (buffers_ == NULL) return;
-    for (int i = 0; i < bufferCnt_; i++)
+    for (int i = 0; i < bufferCnt_; ++i)
     {
         if (munmap(buffers_[i].start, buffers_[i].length) < 0)
         {
@@ -250,7 +293,7 @@ void VideoDevice::startStream()
 {
     enum v4l2_buf_type type;
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (ioctl(deviceFd_, VIDIOC_STREAMON, &type) < 0) //开始捕捉图像数据
+    if (ioctl(deviceFd_, VIDIOC_STREAMON, &type) < 0) // 开始捕捉图像数据
     {
         perror("VIDIOC_STREAMON");
     }
@@ -269,22 +312,37 @@ void VideoDevice::stopStream()
 
 int VideoDevice::init()
 {
-    if (openDevice() < 0)
-        return -1;
-    setFormat();
-    setStreamParm();
-    requestBuffer();
-    startStream();
+    if (mmap_)
+    {
+        setStreamParm();
+        requestBuffer();
+        startStream();
+    }
+    else if (buffers_ == NULL)
+    {
+        buffers_ = (VideoBuffer*)calloc(1, sizeof(*buffers_));
+        buffers_->length = imageSize_.width * imageSize_.height * 2;
+        buffers_->start = malloc(buffers_->length);
+    }
 
     return 0;
 }
 
 void VideoDevice::release()
 {
-    stopStream();
-    releaseBuffer();
+    if (mmap_)
+    {
+        stopStream();
+        releaseBuffer();
+    }
+    else if (buffers_ != NULL)
+    {
+        free(buffers_->start);
+        free(buffers_);
+        buffers_ = NULL;
+    }
     closeDevice();
 }
 
-}
+} // namespace evt
 

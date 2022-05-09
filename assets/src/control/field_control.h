@@ -1,40 +1,67 @@
-#ifndef EVT_FIELD_CONTROL_H
-#define EVT_FIELD_CONTROL_H
+#ifndef EVT_CONTROL_FIELD_CONTROL_H
+#define EVT_CONTROL_FIELD_CONTROL_H
 
-#include "control.h"
+#include <utility>
+#include "../util/common.h"
 #include "pid.h"
 
-namespace EVTrack
+namespace evt
 {
 
-//摄像头云台视野控制
-class FieldControl: public Control
+// 摄像头云台视野控制
+class FieldControl
 {
 public:
     FieldControl();
+    ~FieldControl();
+
+    DISALLOW_COPY_AND_ASSIGN(FieldControl);
+
+    bool openDevice(const char* deviceName);
+
     void perform();
 
-    static float angleHDef;//水平角默认值
-    static float angleVDef;//垂直角默认值
+    void enableAutoMode(bool autoMode) { autoMode_ = autoMode; }
+    bool isAutoMode() const { return autoMode_; }
 
-    static std::atomic<float> angleH, angleV;
-    static volatile int angleHSet;//水平角设定值
-    static volatile int angleVSet;//垂直角设定值
-    static volatile bool valSetFlag;;
-    static volatile bool autoCtlFlag;//手自动控制标志
+    void setAngleHKp(float val) { pidAngleH_.setKp(val); }
+    void setAngleHKd(float val) { pidAngleH_.setKd(val); }
 
-    static volatile bool pidSetFlag;
-    static volatile float pidParams[4];//两组PD参数
+    void setAngleVKp(float val) { pidAngleV_.setKp(val); }
+    void setAngleVKd(float val) { pidAngleV_.setKd(val); }
+
+    void setAngleHPDParams(float kp, float kd) { pidAngleH_.setParams(kp, 0, kd); }
+    void setAngleVPDParams(float kp, float kd) { pidAngleV_.setParams(kp, 0, kd); }
+
+    std::pair<float, float> angleHPDParams() const { return {pidAngleH_.kp(), pidAngleH_.kd()}; }
+    std::pair<float, float> angleVPDParams() const { return {pidAngleV_.kp(), pidAngleV_.kd()}; }
+
+    void setAngleH(float angleH) { angleH_ = angleH; }
+    float angleH() const { return angleH_; }
+
+    void setAngleV(float angleV) { angleV_ = angleV; }
+    float angleV() const { return angleV_; }
+
+    void setAngleHDefault(float angleH) { angleHDefault_ = angleH; }
+    float angleHDefault() const { return angleHDefault_; }
+
+    void setAngleVDefault(float angleV) { angleVDefault_ = angleV; }
+    float angleVDefault() const { return angleVDefault_; }
+
+    void resetAngleH() { angleH_ = angleHDefault_; }
+    void resetAngleV() { angleV_ = angleVDefault_; }
+
 private:
-    PID pidAngleH_;//自动模式下水平角PD控制
-    PID pidAngleV_;//自动模式下垂直角PD控制
+    PID pidAngleH_; // 自动模式下水平角PD控制
+    PID pidAngleV_; // 自动模式下垂直角PD控制
 
+    int deviceFd_;
+    bool autoMode_; // 手自动控制标志
+    float angleH_, angleV_;
+    float angleHDefault_, angleVDefault_;
 
 };
 
+} // namespace evt
 
-
-}
-
-
-#endif  //EVT_FIELD_CONTROL_H
+#endif // EVT_CONTROL_FIELD_CONTROL_H

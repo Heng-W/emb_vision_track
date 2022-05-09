@@ -4,10 +4,7 @@
 #include "rect_tools.hpp"
 
 
-namespace EVTrack
-{
-
-namespace kcf
+namespace evt
 {
 
 static cv::Mat sub;
@@ -18,7 +15,6 @@ static cv::Point2f result[3];
 
 inline int findMaxIndex(float a, float b, float c)
 {
-
     int idx = 0;
     float max = a;
     if (b > max)
@@ -34,8 +30,8 @@ inline int findMaxIndex(float a, float b, float c)
     return idx;
 }
 
-KCFTracker::KCFTracker(bool useMultiScale):
-    _useMultiScale(useMultiScale)
+KCFTracker::KCFTracker(bool useMultiScale)
+    : _useMultiScale(useMultiScale)
 {
     initVar();
 }
@@ -43,25 +39,24 @@ KCFTracker::KCFTracker(bool useMultiScale):
 void KCFTracker::initVar()
 {
 
-    lambda = 0.0001;//正则化参数
-    padding = 2.5;//(第一帧)
-    //output_sigma_factor = 0.1;
-    output_sigma_factor = 0.125;//(第一帧)
+    lambda = 0.0001; // 正则化参数
+    padding = 2.5; // (第一帧)
+    // output_sigma_factor = 0.1;
+    output_sigma_factor = 0.125; // (第一帧)
 
 
     // RAW
-    interp_factor = 0.075;//插值系数(训练)
-    sigma = 0.2;//(高斯核函数)
+    interp_factor = 0.075; // 插值系数(训练)
+    sigma = 0.2; // (高斯核函数)
 
 
-    setTrackMode(_useMultiScale);
-
+    enableMultiScale(_useMultiScale);
 }
 
 
-void KCFTracker::setTrackMode(bool useMultiScale)
+void KCFTracker::enableMultiScale(bool enable)
 {
-    _useMultiScale = useMultiScale;
+    _useMultiScale = enable;
 
     if (_useMultiScale)
     {
@@ -72,12 +67,10 @@ void KCFTracker::setTrackMode(bool useMultiScale)
     }
     else
     {
-
         template_size = 96;
         //template_size = 100;
         scale_step = 1;
     }
-
 }
 
 
@@ -98,20 +91,17 @@ void KCFTracker::init(const cv::Rect& roi, cv::Mat& image)
     _roi = roi;
     assert(roi.width >= 0 && roi.height >= 0);
 
-
-
     _tmpl = getFeatures(image, 1, true);
     _prob = createGaussianPeak(size_patch[0], size_patch[1]);
     _alphaf = cv::Mat(size_patch[0], size_patch[1], CV_32FC2, float(0));
-    //_num = cv::Mat(size_patch[0], size_patch[1], CV_32FC2, float(0));
-    //_den = cv::Mat(size_patch[0], size_patch[1], CV_32FC2, float(0));
+    // _num = cv::Mat(size_patch[0], size_patch[1], CV_32FC2, float(0));
+    // _den = cv::Mat(size_patch[0], size_patch[1], CV_32FC2, float(0));
     train(_tmpl, 1.0); // train with initial frame
 }
+
 // Update position based on the new frame
 cv::Rect KCFTracker::update(cv::Mat& image)
 {
-
-
     if (_roi.x + _roi.width <= 0) _roi.x = -_roi.width + 1;
     if (_roi.y + _roi.height <= 0) _roi.y = -_roi.height + 1;
     if (_roi.x >= image.cols - 1) _roi.x = image.cols - 2;
@@ -139,7 +129,6 @@ cv::Rect KCFTracker::update(cv::Mat& image)
             case 0:
                 break;
             case 1:
-
                 _scale /= scale_step;
                 _roi.width /= scale_step;
                 _roi.height /= scale_step;
@@ -369,6 +358,4 @@ float KCFTracker::subPixelPeak(float left, float center, float right)
     return 0.5 * (right - left) / divisor;
 }
 
-}
-
-}
+} // namespace evt

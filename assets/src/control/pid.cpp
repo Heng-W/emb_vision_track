@@ -1,12 +1,9 @@
 
 #include "pid.h"
 #include <math.h>
-#include "control_macro.hpp"
 
-
-namespace EVTrack
+namespace evt
 {
-
 
 PID::PID(float setpoint, float dt, float kp, float ki, float kd):
     setpoint_(setpoint),
@@ -42,8 +39,9 @@ float PID::calculate(float error)
         }
         if (integralLimit_ != 0)
         {
-            //积分限幅
-            limit(integral_, integralLimit_);
+            // 积分限幅
+            if (integral_ < -integralLimit_) integral_ = -integralLimit_;
+            else if (integral_ > integralLimit_) integral_ = integralLimit_;
         }
         integralOut = integralCoef_ * pidParams_[1] * integral_;
 
@@ -51,8 +49,9 @@ float PID::calculate(float error)
     output_ = pidParams_[0] * error + integralOut + pidParams_[2] * (error - lastError_);
     if (outputLimit_ != 0)
     {
-        //输出限幅
-        limit(output_, outputLimit_);
+        // 输出限幅
+        if (output_ < -outputLimit_) output_ = -outputLimit_;
+        else if (output_ > outputLimit_) output_ = outputLimit_;
     }
     lastError_ = error;
     return output_;
@@ -72,7 +71,6 @@ float PID::divideOutput()
 }
 
 
-
 void PID::reset()
 {
     lastError_ = 0;
@@ -82,6 +80,4 @@ void PID::reset()
     divideCnt_ = 0;
 }
 
-}
-
-
+} // namespace evt

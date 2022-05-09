@@ -1,65 +1,103 @@
-CROSS_COMPILE?=arm-linux-
-#CC=$(CROSS_COMPILE)gcc
-#CFLAGS=-std=c99 -Wall -O2
-CXX=$(CROSS_COMPILE)g++
-CXXFLAGS=-std=c++11 -Wall -O2
-LINKFLAGS=-pthread
 
-BIN_NAME:=out
+CXX:=arm-linux-g++
+CXXFLAGS:=-std=c++11 -Wall 
+LINKFLAGS:=-pthread -lm
+
+OUTPUT_NAME:=emb_vision_track
+
+TYPE?=Release
+ifeq ($(TYPE), Debug)
+CXXFLAGS+= -O -g
+else ifeq ($(TYPE), Release)
+CXXFLAGS+= -O2 -DNDEBUG
+else
+$(error TYPE invalid)
+endif
+
+ifneq ("$(MACRO)", "")
+CXXFLAGS+=$(addprefix -D,$(MACRO))
+endif
+
+
+ifeq ($(TYPE), Debug)
+BIN_NAME?=$(OUTPUT_NAME).d
+else
+BIN_NAME?=$(OUTPUT_NAME)
+endif
+
+
+ifeq ($(TYPE), Debug)
+OBJ_DIR_NAME?=obj.d
+DEP_DIR_NAME?=dep.d
+else
+OBJ_DIR_NAME?=obj
+DEP_DIR_NAME?=dep
+endif
+
 TOPDIR:=$(shell pwd)
-SRC_TOPDIR:=$(TOPDIR)/src
-OBJ_TOPDIR:=$(TOPDIR)/build/obj
-DEP_TOPDIR:=$(TOPDIR)/build/dep
-BIN_DIR:=$(TOPDIR)/build/bin
+SRC_TOPDIR:=src
+OBJ_TOPDIR:=build/$(OBJ_DIR_NAME)
+DEP_TOPDIR:=build/$(DEP_DIR_NAME)
+LIB_DIR:=lib
+LOG_DIR:=logs
+BIN_DIR:=bin
 BIN:=$(BIN_DIR)/$(BIN_NAME)
 
-export CXX CXXFLAGS TOPDIR SRC_TOPDIR OBJ_TOPDIR DEP_TOPDIR
-
-LIB_DIRS:=$(shell find lib -type d)
-LIB_NAMES:=$(notdir $(foreach n,$(LIB_DIRS),$(wildcard $(n)/*.so)))
-
-LIB_DIR_FLAG:=$(addprefix -L $(TOPDIR)/,$(LIB_DIRS))
-LIB_NAME_FLAG:=$(patsubst lib%.so,-l%,$(LIB_NAMES))
-LINKFLAGS+=$(LIB_DIR_FLAG) $(LIB_NAME_FLAG)
+export CXX CXXFLAGS TOPDIR SRC_TOPDIR OBJ_TOPDIR DEP_TOPDIR EXTRA_INCLUDE_DIR INSTALL_DIR
 
 
+# Compile CXX project
 
-# Compile C++ project
-
-.PHONY: all $(SRC_TOPDIR) $(BIN)
-all: $(SRC_TOPDIR) $(BIN_DIR) $(BIN)
+.PHONY: all $(SRC_TOPDIR)
+all: $(SRC_TOPDIR) $(BIN_DIR)
 
 $(SRC_TOPDIR):
+	$(MAKE) -C $@
 	@echo
-	make -C $@
+	@echo "Check object files..."
+	@$(MAKE) -f Makefile.link BIN=$(BIN) LINKFLAGS="$(LINKFLAGS)" \
+	LIB_DIR="$(LIB_DIR)" OBJ_DIR_NAME="$(OBJ_DIR_NAME)" \
+	EXTRA_LIB_DIR="$(EXTRA_LIB_DIR)" EXTRA_LIB_NAME="$(EXTRA_LIB_NAME)"
+	@echo
 
 $(BIN_DIR):
 	mkdir -p $@
 
-$(BIN):
-	@echo
-	@echo "Check object files..."	
-	make -C build/ BIN=$(BIN) LINKFLAGS="$(LINKFLAGS)"
-	@echo
+.PHONY: clean exec test install 
 
-
-.PHONY: exec clean
-
+clean:
+	rm -rf build/ $(LOG_DIR)
+	rm -f `find $(BIN_DIR) -type f | egrep -v "(.sh$$|.bat$$)"`
+	
 exec:
 	$(BIN)
 
-clean:
-	rm -rf $(OBJ_TOPDIR) $(DEP_TOPDIR) $(BIN_DIR)
+test:
+	$(MAKE) -C $@
+
+
+INSTALL_DIR:=$(abspath $(PREFIX))
+INSTALL_LIB_DIR:=$(INSTALL_DIR)/lib
+INSTALL_LIB:=$(INSTALL_LIB_DIR)/$(BIN_NAME)
+
+install: $(INSTALL_LIB)
+	$(MAKE) -C src $@
+	@echo
+	@echo "installed to: $(INSTALL_DIR)"
+	@echo
+
+ifeq ("$(wildcard $(INSTALL_LIB_DIR))", "")
+$(INSTALL_LIB):$(BIN) $(INSTALL_LIB_DIR)
+else
+$(INSTALL_LIB):$(BIN)
+endif
+	cp $< $@
+
+$(INSTALL_LIB_DIR):
+	mkdir -p $@
 
 
 
-# kernel modules
 
-modules modules_clean:
-	@echo	
-	make -C drivers/ $@
 
-cleanall:
-	make clean
-	make modules_clean
 

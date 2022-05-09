@@ -1,52 +1,46 @@
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <pthread.h>
-#include <signal.h>
-#include <sys/time.h>
-#include <iostream>
+#include "net/event_loop.h"
+#include "vision/vision_event_loop.h"
+#include "control/control_event_loop.h"
+#include "util/config_file_reader.h"
+#include "server.h"
 
-#include "comm/server.h"
-#include "vision/event.h"
-#include "control/event.h"
-
-using namespace EVTrack;
+using namespace evt;
 
 
-namespace EVTrack
+int main()
 {
-void initVar();
-}
+    util::ConfigFileReader config("conf/var.conf");
 
-static void sleepMs(unsigned long ms);
+    const char* portStr = config.get("port");
+    uint16_t port = portStr ? static_cast<uint16_t>(atoi(portStr)) : 18825;
 
+    const char* videoDev = config.get("video_device");
+    if (!videoDev) videoDev = "/dev/video0";
 
-int main(int argc, char* argv [])
-{
-    initVar();//设置变量初值
+    VisionEventLoop visionEventLoop;
+    ControlEventLoop controlEventLoop;
 
-    Server server;
+    std::thread visionThread([&visionEventLoop]()
+    {
+        visionEventLoop.loop();
+    });
+    std::thread controlThread([&controlEventLoop]()
+    {
+        controlEventLoop.loop();
+    });
 
-    control::Event controlEvent(server);//设备控制事件
-    vision::Event visionEvent(server);//视觉处理事件
-    sleepMs(1000);
+    net::EventLoop loop;
+    Server server(&loop, net::InetAddress(port));
+    server.start();
+    loop.loop();
 
-    server.startup();//启动服务器
-    sleepMs(1000);
+    visionEventLoop.quit();
+    controlEventLoop.quit();
+
+    visionThread.join();
+    controlThread.join();
 
     return 0;
-}
-
-
-
-static void sleepMs(unsigned long ms)
-{
-    struct timeval tv;
-    tv.tv_sec = ms / 1000;
-    tv.tv_usec = (ms % 1000) * 1000;
-    select(0, NULL, NULL, NULL, &tv);
 }
 

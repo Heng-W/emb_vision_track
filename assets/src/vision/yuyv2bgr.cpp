@@ -1,15 +1,27 @@
 
-namespace EVTrack
+namespace evt
 {
 
-static int y_table[256];//查表法
-static int v_r_table[256];
-static int v_g_table[256];
-static int u_g_table[256];
-static int u_b_table[256];
+namespace
+{
 
-static unsigned int limit_table[256 * 3];
+// 查表法
+int y_table[256];
+int v_r_table[256];
+int v_g_table[256];
+int u_g_table[256];
+int u_b_table[256];
 
+unsigned int limit_table[256 * 3];
+
+
+void initColorTables();
+
+bool onLoad = []()
+{
+    initColorTables();
+    return true;
+}();
 
 inline unsigned int limitToUnsigned8Bits(int value)
 {
@@ -35,10 +47,12 @@ void initColorTables()
     {
         limit_table[i] = limitToUnsigned8Bits(i - 256);
     }
-
 }
 
-void yuyv2bgr(int width, int height, unsigned char* bufferIn, unsigned char* bufferOut)
+} // namespace
+
+
+void yuyv2bgr(unsigned char* bufferIn, unsigned char* bufferOut, int width, int height)
 {
     unsigned char y1, u, y2, v;
     int size = width * height;
@@ -64,4 +78,4 @@ void yuyv2bgr(int width, int height, unsigned char* bufferIn, unsigned char* buf
     }
 }
 
-}
+} // namespace evt

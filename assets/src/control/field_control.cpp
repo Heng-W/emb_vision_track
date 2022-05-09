@@ -1,32 +1,23 @@
 
 #include "field_control.h"
+#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <math.h>
-#include <iostream>
+#include <algorithm>
 
-#include "control_macro.hpp"
-#include "../vision/locate.h"
-#include "../vision/video_device.h"
-
-
-
+#include "../util/singleton.hpp"
+#include "../util/logger.h"
+#include "../vision/vision_event_loop.h"
+#include "control_params.h"
 
 #define IOC_MAGIC 0x81
 
 #define COMBINE_CMD(cmd,ch) _IOWR(IOC_MAGIC,((cmd)<<1|((ch)&0x1)),int)
 
 
-namespace EVTrack
+namespace evt
 {
-
-namespace vision
-{
-
-extern bool trackFlag;
-
-}
 
 enum SERVO_DEVICE_CMD
 {
@@ -38,81 +29,73 @@ enum SERVO_DEVICE_CMD
     STOP_PWM
 };
 
-float FieldControl::angleHDef = 90;
-float FieldControl::angleVDef = 90;
-
-
-std::atomic<float> FieldControl::angleH(FieldControl::angleHDef);
-std::atomic<float> FieldControl::angleV(FieldControl::angleVDef);
-
-volatile int FieldControl::angleHSet = FieldControl::angleHDef * 100;
-volatile int FieldControl::angleVSet = FieldControl::angleVDef * 100;
-volatile bool FieldControl::valSetFlag = false;
-volatile bool FieldControl::autoCtlFlag = false;
-
-
-volatile bool FieldControl::pidSetFlag = false;
-volatile float FieldControl::pidParams[4] = {SERVO_CTRL_KP, SERVO_CTRL_KD, SERVO_CTRL_KP, SERVO_CTRL_KD};
-
-
-FieldControl::FieldControl():
-    Control("/dev/servo", true),
-    pidAngleH_(VideoDevice::IMAGE_W / 2, SERVO_CTRL_DT, SERVO_CTRL_KP, 0, SERVO_CTRL_KD),
-    pidAngleV_(VideoDevice::IMAGE_H / 2, SERVO_CTRL_DT, SERVO_CTRL_KP, 0, SERVO_CTRL_KD)
+FieldControl::FieldControl()
+    : pidAngleH_(INITIAL_CENTER_W, SERVO_CTRL_DT, SERVO_CTRL_KP, 0, SERVO_CTRL_KD),
+      pidAngleV_(INITIAL_CENTER_H, SERVO_CTRL_DT, SERVO_CTRL_KP, 0, SERVO_CTRL_KD),
+      autoMode_(false),
+      angleH_(DEFAULT_ANGLE_H),
+      angleV_(DEFAULT_ANGLE_V),
+      angleHDefault_(DEFAULT_ANGLE_H),
+      angleVDefault_(DEFAULT_ANGLE_V)
 {
     pidAngleH_.setOutputLimit(20);
     pidAngleV_.setOutputLimit(20);
 
-
 }
 
+FieldControl::~FieldControl()
+{
+    if (deviceFd_ >= 0)
+    {
+        close(deviceFd_);
+    }
+}
+
+bool FieldControl::openDevice(const char* deviceName)
+{
+    deviceFd_ = ::open(deviceName, O_RDWR);
+    if (deviceFd_ < 0)
+    {
+        LOG(ERROR) << "open " << deviceName;
+        return false;
+    }
+    return true;
+}
 
 void FieldControl::perform()
 {
-    if (pidSetFlag)
-    {
-        pidSetFlag = false;
-        pidAngleH_.setParams(pidParams[0], 0, pidParams[1]);
-        pidAngleV_.setParams(pidParams[2], 0, pidParams[3]);
-    }
+    if (!autoMode_ || deviceFd_ < 0) return;
 
-    if (!autoCtlFlag)
-    {
-        if (valSetFlag)
-        {
-            valSetFlag = false;
-            angleH = (float)angleHSet / 100;
-            angleV = (float)angleVSet / 100;
-        }
-    }
-    else
-    {
-        if (deviceFd_ < 0 || !vision::trackFlag) return;
+    VisionEventLoop& vision = util::Singleton<VisionEventLoop>::instance();
 
-        //  if (!Locate::findFlag) return;
-        float error;
-        float angle = angleH;
-        error = pidAngleH_.getError(Locate::xpos);
-        if (fabs(error) > POS_ERROR_MIN)
-            angle = angleH + pidAngleH_.calculate(error);
-        limit(angle, (float)MIN_ANGLE_H, (float)MAX_ANGLE_H);
-        angleH = angle;
+    if (!vision.trackEnabled()) return;
 
-        angle = angleV;
-        error = pidAngleV_.getError(Locate::ypos);
-        if (fabs(error) > POS_ERROR_MIN)
-            angle = angleV - pidAngleV_.calculate(error);
-        limit(angle, (float)MIN_ANGLE_V, (float)MAX_ANGLE_V);
-        angleV = angle;
+    Rect result = vision.trackResult();
+
+    float error;
+    float angle = angleH_;
+    error = pidAngleH_.getError(result.xpos);
+    if (fabs(error) > POS_ERROR_MIN)
+    {
+        angle = angleH_ + pidAngleH_.calculate(error);
     }
-    //angleV = limit(pidAngleV_.calculate(locate.getYpos()) + DEFAULT_ANGLE_V, MIN_ANGLE_V, MAX_ANGLE_V);
+    angle = std::max(angle, MIN_ANGLE_H);
+    angle = std::min(angle, MAX_ANGLE_H);
+    angleH_ = angle;
+
+    angle = angleV_;
+    error = pidAngleV_.getError(result.ypos);
+    if (fabs(error) > POS_ERROR_MIN)
+    {
+        angle = angleV_ - pidAngleV_.calculate(error);
+    }
+    angle = std::max(angle, MIN_ANGLE_V);
+    angle = std::min(angle, MAX_ANGLE_V);
+    angleV_ = angle;
 
     if (deviceFd_ < 0) return;
-    ioctl(deviceFd_, COMBINE_CMD(SET_ANGLE, 0), &angleH);
-    ioctl(deviceFd_, COMBINE_CMD(SET_ANGLE, 1), &angleV);
-
+    ioctl(deviceFd_, COMBINE_CMD(SET_ANGLE, 0), &angleH_);
+    ioctl(deviceFd_, COMBINE_CMD(SET_ANGLE, 1), &angleV_);
 }
 
-
-
-}
+} // namespace evt

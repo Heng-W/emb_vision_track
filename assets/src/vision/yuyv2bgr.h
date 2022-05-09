@@ -1,18 +1,12 @@
-#ifndef EVT_YUYV2RGB_H
-#define EVT_YUYV2RGB_H
+#ifndef EVT_YUYV2BGR_H
+#define EVT_YUYV2BGR_H
 
-
-namespace EVTrack
+namespace evt
 {
 
-//生成查表法所需的表格
-void initColorTables();
+// 查表法将YUYV图像转换成BGR图像
+void yuyv2bgr(unsigned char* bufferIn, unsigned char* bufferOut, int width, int height);
 
-//查表法将YUYV图像转换成BGR图像
-void yuyv2bgr(int width, int height, unsigned char* bufferIn, unsigned char* bufferOut);
+} // namespace evt
 
-
-}
-
-
-#endif
+#endif // EVT_YUYV2BGR_H
