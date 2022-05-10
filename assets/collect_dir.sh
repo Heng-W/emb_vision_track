@@ -1,11 +1,12 @@
 #!/bin/bash
 
-collect_dir(){
-    subdir_list=`cat $1/dir_list`
-    for dir in $subdir_list; do
-        echo $1/$dir
+collect_dir() {
+    echo $1
+    subdirs=`cat $1/dir_list`
+    for dir in $subdirs; do
         collect_dir $1/$dir
     done
 }
 
-collect_dir $1
+TOP_DIR=`echo $1 | sed "s|/$||"`
+collect_dir $TOP_DIR
