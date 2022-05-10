@@ -40,7 +40,7 @@ TcpServer::~TcpServer()
     {
         TcpConnectionPtr conn(item.second);
         item.second.reset();
-        conn->getLoop()->runInLoop([conn] { conn->connectDestroyed(); });
+        conn->getLoop()->runInLoop(&TcpConnection::connectDestroyed, conn);
     }
 }
 
@@ -57,7 +57,7 @@ void TcpServer::start()
         threadPool_->start(threadInitCallback_);
 
         assert(!acceptor_->listening());
-        loop_->runInLoop([this] { acceptor_->listen(); });
+        loop_->runInLoop(&Acceptor::listen, acceptor_.get());
     }
 }
 
@@ -76,9 +76,9 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
     conn->setConnectionCallback(connectionCallback_);
     conn->setMessageCallback(messageCallback_);
     conn->setWriteCompleteCallback(writeCompleteCallback_);
-    conn->setCloseCallback([this](const TcpConnectionPtr & conn) { this->removeConnection(conn); });
+    conn->setCloseCallback([this](const TcpConnectionPtr & conn) { removeConnection(conn); });
 
-    ioLoop->runInLoop([conn] { conn->connectEstablished(); });
+    ioLoop->runInLoop(&TcpConnection::connectEstablished, conn);
 }
 
 void TcpServer::removeConnection(const TcpConnectionPtr& conn)
@@ -92,7 +92,7 @@ void TcpServer::removeConnection(const TcpConnectionPtr& conn)
         (void)n;
         assert(n == 1);
         EventLoop* ioLoop = conn->getLoop();
-        ioLoop->queueInLoop([conn] { conn->connectDestroyed(); });
+        ioLoop->queueInLoop(&TcpConnection::connectDestroyed, conn);
     });
 }
 

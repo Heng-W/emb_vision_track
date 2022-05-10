@@ -126,7 +126,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
             remaining = len - nwrote;
             if (remaining == 0 && writeCompleteCallback_)
             {
-                loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
+                loop_->queueInLoop(writeCompleteCallback_, shared_from_this());
             }
         }
         else // nwrote < 0
@@ -151,7 +151,7 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
                 oldLen < highWaterMark_ &&
                 highWaterMarkCallback_)
         {
-            loop_->queueInLoop(std::bind(highWaterMarkCallback_, shared_from_this(), oldLen + remaining));
+            loop_->queueInLoop(highWaterMarkCallback_, shared_from_this(), oldLen + remaining);
         }
         outputBuffer_.append(static_cast<const char*>(data) + nwrote, remaining);
         if (!channel_->isWriting())
@@ -166,7 +166,7 @@ void TcpConnection::shutdown()
     if (state_ == kConnected)
     {
         setState(kDisconnecting);
-        loop_->runInLoop([this] { this->shutdownInLoop(); });
+        loop_->runInLoop(&TcpConnection::shutdownInLoop, this);
     }
 }
 
@@ -184,7 +184,7 @@ void TcpConnection::forceClose()
     if (state_ == kConnected || state_ == kDisconnecting)
     {
         setState(kDisconnecting);
-        loop_->queueInLoop(std::bind(&TcpConnection::forceCloseInLoop, shared_from_this()));
+        loop_->queueInLoop(&TcpConnection::forceCloseInLoop, shared_from_this());
     }
 }
 
@@ -201,7 +201,6 @@ void TcpConnection::startRead()
 {
     loop_->runInLoop([this]
     {
-        loop_->assertInLoopThread();
         if (!reading_ || !channel_->isReading())
         {
             channel_->enableReading();
@@ -214,7 +213,6 @@ void TcpConnection::stopRead()
 {
     loop_->runInLoop([this]
     {
-        loop_->assertInLoopThread();
         if (reading_ || channel_->isReading())
         {
             channel_->disableReading();
@@ -283,7 +281,7 @@ void TcpConnection::handleWrite()
                 channel_->disableWriting();
                 if (writeCompleteCallback_)
                 {
-                    loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
+                    loop_->queueInLoop(writeCompleteCallback_, shared_from_this());
                 }
                 if (state_ == kDisconnecting)
                 {

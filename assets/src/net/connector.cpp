@@ -31,7 +31,7 @@ Connector::~Connector()
 void Connector::start()
 {
     connect_ = true;
-    loop_->runInLoop([this] { this->startInLoop(); });
+    loop_->runInLoop(&Connector::startInLoop, this);
 }
 
 void Connector::startInLoop()

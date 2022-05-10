@@ -44,7 +44,7 @@ TcpClient::~TcpClient()
         {
             conn->setCloseCallback([this](const TcpConnectionPtr & conn)
             {
-                loop_->queueInLoop([conn] { conn->connectDestroyed(); });
+                loop_->queueInLoop(&TcpConnection::connectDestroyed, conn);
             });
         });
 
@@ -117,7 +117,7 @@ void TcpClient::removeConnection(const TcpConnectionPtr& conn)
         connection_.reset();
     }
 
-    loop_->queueInLoop([conn] { conn->connectDestroyed(); });
+    loop_->queueInLoop(&TcpConnection::connectDestroyed, conn);
     if (retry_ && connect_)
     {
         LOG(INFO) << "TcpClient::connect[" << name_ << "] - Reconnecting to "
