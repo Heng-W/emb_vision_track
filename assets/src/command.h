@@ -39,6 +39,7 @@ enum class Command
     UPDATE_CLIENT_CNT,
     LOGOUT,
     UPDATE_PID,
+    LOGIN,
     ENUM_COUNT
 };
 

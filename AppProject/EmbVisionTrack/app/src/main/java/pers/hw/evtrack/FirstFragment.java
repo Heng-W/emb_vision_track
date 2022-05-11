@@ -2,6 +2,8 @@ package pers.hw.evtrack;
 
 
 import androidx.fragment.app.Fragment;
+
+import android.annotation.SuppressLint;
 import android.widget.*;
 import android.os.Message;
 import android.os.Bundle;
@@ -15,6 +17,8 @@ import android.util.Log;
 import android.text.*;
 
 import java.io.*;
+
+import pers.hw.evtrack.net.Buffer;
 import pers.hw.evtrack.view.SteerView;
 
 
@@ -74,10 +78,9 @@ public class FirstFragment extends Fragment {
                     } else {
                         if (client.motionAutoCtlFlag) {
 
-                            toast.setText("ID为" + msg.arg1 + "的用户设置了自动驾驶");
+                            toast.setText("其他用户设置了自动驾驶");
                         } else {
-                            toast.setText("ID为" + msg.arg1 + "的用户设置了手动驾驶");
-
+                            toast.setText("其他用户设置了手动驾驶");
                         }
 
                     }
@@ -143,6 +146,7 @@ public class FirstFragment extends Fragment {
 
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initView() {
         driveModeTv =  view.findViewById(R.id.drive_mode);
         if (client.motionAutoCtlFlag) {
@@ -418,17 +422,17 @@ public class FirstFragment extends Fragment {
 
     private void writeParam() {
         if (editStr == null) return;
-        Packet p;
+        Buffer buf;
 
         if (editIdx < 4) {
-            p = client.newPacket(Command.set_field_ctl_pid);
-            p.writeInt32(editIdx);
+            buf = Client.createBuffer(Command.SET_FIELD_CTL_PID);
+            buf.appendInt32(editIdx);
         } else {
-            p = client.newPacket(Command.set_motion_ctl_pid);
-            p.writeInt32(editIdx - 4);
-
+            buf = Client.createBuffer(Command.SET_MOTION_CTL_PID);
+            buf.appendInt32(editIdx - 4);
         }
-        p.writeFloat(Float.parseFloat(editStr));
+        buf.appendFloat(Float.parseFloat(editStr));
+        Client.packBuffer(buf);
         try {
             client.sendPacket(p);
         } catch (IOException e) {

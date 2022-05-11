@@ -35,6 +35,9 @@ import android.widget.CompoundButton.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.lang.reflect.Field;
+
+import pers.hw.evtrack.net.Buffer;
+import pers.hw.evtrack.net.TcpConnection;
 import pers.hw.evtrack.view.DialogUtils;
 
 
@@ -90,7 +93,7 @@ public class MainActivity extends FragmentActivity {
                 case 10:
                     clearDim();
                     DialogUtils.closeDialog(loadDialog);
-                    if (client.isConnected) {
+                    if (client.connection() != null) {
 
                         toast.setText("连接成功");
                         toast.show();
@@ -137,21 +140,21 @@ public class MainActivity extends FragmentActivity {
                             toast.setText("密码错误，请重试");
                             toast.show();
                             try {
-                                client.getSocket().close();
+                                client.connection().shutdown();
                             } catch (Exception e) {}
                             break;
                         case 2:
                             toast.setText("用户名不存在");
                             toast.show();
                             try {
-                                client.getSocket().close();
+                                client.connection().shutdown();
                             } catch (Exception e) {}
                             break;
                         case 3:
                             toast.setText("用户ID未注册");
                             toast.show();
                             try {
-                                client.getSocket().close();
+                                client.connection().shutdown();
                             } catch (Exception e) {}
                             break;
                         default:
@@ -282,7 +285,6 @@ public class MainActivity extends FragmentActivity {
 
 
     private void refreshConnectView() {
-        client.isConnected = false;
         client.userType = 0;
 
         idx = FRAG_MAX;
@@ -302,8 +304,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void initMainView() {
-
-        client.writeToServer(Command.init);
+        client.send(Command.INIT);
 
         getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.white));
         getWindow().setStatusBarColor(getResources().getColor(R.color.primary));
@@ -334,7 +335,10 @@ public class MainActivity extends FragmentActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_exit:
-                        client.writeToServer(Command.exit);
+                        TcpConnection conn = client.connection();
+                        if (conn != null) {
+                            conn.shutdown();
+                        }
                         break;
                     case R.id.action_reset: {
                         if (client.userType != 0) {
@@ -344,11 +348,9 @@ public class MainActivity extends FragmentActivity {
                             return true;
                         }
 
-                        Packet p = client.newPacket(Command.reset);
-                        p.writeInt32(0x7);
-                        try {
-                            client.sendPacket(p);
-                        } catch (IOException e) {}
+                        Buffer buf = Client.createBuffer(Command.RESET);
+                        buf.appendInt32(0x7);
+                        client.send(buf);
                         break;
                     }
                     case R.id.action_camera_reset: {
@@ -358,11 +360,9 @@ public class MainActivity extends FragmentActivity {
                             mHandler.sendMessage(msg);
                             return true;
                         }
-                        Packet p = client.newPacket(Command.reset);
-                        p.writeInt32(0x2);
-                        try {
-                            client.sendPacket(p);
-                        } catch (IOException e) {}
+                        Buffer buf = Client.createBuffer(Command.RESET);
+                        buf.appendInt32(0x2);
+                        client.send(buf);
                         break;
                     }
 
@@ -375,9 +375,9 @@ public class MainActivity extends FragmentActivity {
                         }
 
                         if (client.useMultiScale) {
-                            client.writeToServer(Command.disable_multi_scale);
+                            client.send(Command.DISABLE_MULTI_SCALE);
                         } else {
-                            client.writeToServer(Command.enable_multi_scale);
+                            client.send(Command.ENABLE_MULTI_SCALE);
                         }
                         break;
 
@@ -388,7 +388,7 @@ public class MainActivity extends FragmentActivity {
                             mHandler.sendMessage(msg);
                             return true;
                         }
-                        client.writeToServer(Command.halt);
+                        client.send(Command.HALT);
 
                         break;
 
@@ -399,10 +399,8 @@ public class MainActivity extends FragmentActivity {
                             mHandler.sendMessage(msg);
                             return true;
                         }
-                        client.writeToServer(Command.reboot);
-
+                        client.send(Command.REBOOT);
                         break;
-
                     default:
                         break;
                 }
