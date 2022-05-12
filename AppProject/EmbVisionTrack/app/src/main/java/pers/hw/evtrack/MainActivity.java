@@ -27,6 +27,8 @@ import android.content.Context;
 
 import java.net.InetSocketAddress;
 import java.lang.reflect.Field;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import pers.hw.evtrack.net.Buffer;
 import pers.hw.evtrack.net.TcpConnection;
@@ -469,7 +471,7 @@ public class MainActivity extends FragmentActivity {
         final EditText serverIpEdit = view.findViewById(R.id.server_addr_edt);
         final EditText serverPortEdit = view.findViewById(R.id.server_port_edt);
 
-        serverIpEdit.setText(serverAddr.getAddress().toString());
+        serverIpEdit.setText(serverAddr.getHostString());
         serverPortEdit.setText(String.valueOf(serverAddr.getPort()));
 
         // builder.create();
@@ -517,7 +519,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-                serverIpEdit.setText(DEFAULT_SERVER_ADDR.getAddress().toString());
+                serverIpEdit.setText(DEFAULT_SERVER_ADDR.getHostString());
                 serverPortEdit.setText(String.valueOf(DEFAULT_SERVER_ADDR.getPort()));
 
             }
@@ -606,6 +608,16 @@ public class MainActivity extends FragmentActivity {
                         client = new Client(serverAddr, userName, password);
                         client.setMainActivity(MainActivity.this);
                         client.setMainHandler(mHandler);
+                        new Timer("Timer").schedule(new TimerTask() {
+                            public void run() {
+                                if (client.connection() == null) {
+                                    client.stop();
+                                    Message msg = mHandler.obtainMessage(12, -1, 0);
+                                    mHandler.sendMessage(msg);
+                                }
+                            }
+                        }, 5000);
+
                         client.start();
                     }
                 }).start();
