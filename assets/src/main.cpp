@@ -12,14 +12,23 @@ int main()
 {
     util::ConfigFileReader config("conf/var.conf");
 
-    const char* portStr = config.get("port");
+    const char* portStr = config.get("listen_port");
     uint16_t port = portStr ? static_cast<uint16_t>(atoi(portStr)) : 18825;
 
-    const char* videoDev = config.get("video_device");
-    if (!videoDev) videoDev = "/dev/video0";
-
-    VisionEventLoop visionEventLoop;
-    ControlEventLoop controlEventLoop;
+    VisionEventLoop& visionEventLoop = Singleton<VisionEventLoop>::instance();
+    ControlEventLoop& controlEventLoop = Singleton<ControlEventLoop>::instance();
+    
+    const char* videoDevice = config.get("video_device");
+    if (!videoDevice) videoDevice = "/dev/video0";
+    visionEventLoop.openDevice(videoDevice);
+    
+    const char* servoDevice = config.get("servo_device");
+    if (!servoDevice) servoDevice = "/dev/servo";
+    controlEventLoop.openDevice(videoDevice);
+    
+    const char* videoDevice = config.get("video_device");
+    if (!videoDevice) videoDevice = "/dev/video0";
+    visionEventLoop.openDevice(videoDevice);
 
     std::thread visionThread([&visionEventLoop]()
     {

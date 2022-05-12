@@ -7,15 +7,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.app.Dialog;
 import android.app.AlertDialog;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.StrictMode;
 import android.os.Message;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.ViewGroup;
@@ -23,17 +19,13 @@ import android.view.MenuItem;
 import android.view.LayoutInflater;
 import android.view.ViewGroupOverlay;
 import android.view.View.OnClickListener;
-import android.view.MotionEvent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.Color;
 import android.widget.*;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.widget.CompoundButton.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.net.InetSocketAddress;
 import java.lang.reflect.Field;
 
 import pers.hw.evtrack.net.Buffer;
@@ -49,15 +41,20 @@ public class MainActivity extends FragmentActivity {
     private TextView titleTv;
     private Toast toast;
     private Client client;
-    private int idx = FRAG_MAX;
-
-    EditText userEdt;
-    EditText pwdEdt;
-
+    private int fragIndex = FRAG_MAX;
 
     private PopupMenu popupMenu;
     //private MenuItem tstItem;
     private MainHandler mHandler = new MainHandler();
+
+
+    private final InetSocketAddress DEFAULT_SERVER_ADDR = new InetSocketAddress("127.0.0.1",12);
+
+    private InetSocketAddress serverAddr = DEFAULT_SERVER_ADDR;
+
+    private int userType;
+    private String userName;
+    private String password;
 
     private class MainHandler extends Handler {
 
@@ -182,7 +179,7 @@ public class MainActivity extends FragmentActivity {
                 case 50:
                     // toast.setText(client.noticeMsg);
                     //toast.show();
-                    initNoticeDialog("消息", client.noticeMsg);
+                    initNoticeDialog("消息", (String)msg.obj);
                     break;
 
 
@@ -226,8 +223,7 @@ public class MainActivity extends FragmentActivity {
         toast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
 
         fc = new FragmentComponent[FRAG_MAX];
-        client = new Client();
-        client.setMainHandler(mHandler);
+
         initConnectView();
 
     }
@@ -285,9 +281,9 @@ public class MainActivity extends FragmentActivity {
 
 
     private void refreshConnectView() {
-        client.userType = 0;
+        userType = 0;
 
-        idx = FRAG_MAX;
+        fragIndex = FRAG_MAX;
         for (int i = 0; i < FRAG_MAX; i++) {
             fc[i].release();
         }
@@ -341,7 +337,7 @@ public class MainActivity extends FragmentActivity {
                         }
                         break;
                     case R.id.action_reset: {
-                        if (client.userType != 0) {
+                        if (userType != 0) {
                             Message msg = new Message();
                             msg.what = 100;
                             mHandler.sendMessage(msg);
@@ -354,7 +350,7 @@ public class MainActivity extends FragmentActivity {
                         break;
                     }
                     case R.id.action_camera_reset: {
-                        if (client.userType != 0) {
+                        if (userType != 0) {
                             Message msg = new Message();
                             msg.what = 100;
                             mHandler.sendMessage(msg);
@@ -367,7 +363,7 @@ public class MainActivity extends FragmentActivity {
                     }
 
                     case R.id.action_track_mode:
-                        if (client.userType == 2) {
+                        if (userType == 2) {
                             Message msg = new Message();
                             msg.what = 100;
                             mHandler.sendMessage(msg);
@@ -473,8 +469,8 @@ public class MainActivity extends FragmentActivity {
         final EditText serverIpEdit = view.findViewById(R.id.server_addr_edt);
         final EditText serverPortEdit = view.findViewById(R.id.server_port_edt);
 
-        serverIpEdit.setText(client.getServerIp());
-        serverPortEdit.setText(String.valueOf(client.getServerPort()));
+        serverIpEdit.setText(serverAddr.getAddress().toString());
+        serverPortEdit.setText(String.valueOf(serverAddr.getPort()));
 
         // builder.create();
         final AlertDialog dialog = builder.create();
@@ -484,10 +480,10 @@ public class MainActivity extends FragmentActivity {
 
             @Override
             public void onClick(View v) {
-                String serverAddr = serverIpEdit.getText().toString();
+                String serverIp = serverIpEdit.getText().toString();
                 String serverPort = serverPortEdit.getText().toString();
 
-                if (!checkAddress(serverAddr)) {
+                if (!checkAddress(serverIp)) {
                     toast.setText("IP格式错误");
                     toast.show();
                     return;
@@ -498,8 +494,7 @@ public class MainActivity extends FragmentActivity {
                     return;
                 }
 
-
-                client.setServerAddr(serverAddr, Integer.parseInt(serverPort));
+                serverAddr = new InetSocketAddress(serverIp, Integer.parseInt(serverPort));
 
                 toast.setText("设置成功");
                 toast.show();
@@ -522,8 +517,8 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-                serverIpEdit.setText(client.IP_DEFAULT);
-                serverPortEdit.setText(String.valueOf(client.PORT_DEFAULT));
+                serverIpEdit.setText(DEFAULT_SERVER_ADDR.getAddress().toString());
+                serverPortEdit.setText(String.valueOf(DEFAULT_SERVER_ADDR.getPort()));
 
             }
         });
@@ -533,7 +528,7 @@ public class MainActivity extends FragmentActivity {
 
     private void showPopupMenu() {
 
-        switch (idx) {
+        switch (fragIndex) {
             case 0:
                 //tstItem.setVisible(false);
                 break;
@@ -544,34 +539,12 @@ public class MainActivity extends FragmentActivity {
         applyDim(0.15f);
     }
 
-    private void connectServer(final int userID, final String userName, final String pwd) {
-
-        loadDialog = DialogUtils.createLoadingDialog(MainActivity.this, "连接中...");
-        applyDim(0.2f);
-        new Thread(new Runnable() {
-            public void run() {
-                int ret;
-                try {
-                    client.connect();
-
-                    ret = client.requestLogin(userID, userName, pwd);
-                } catch (Exception e) {
-                    ret = -1;
-                }
-                Message msg = new Message();
-                msg.what = 12;
-                msg.arg1 = ret;
-                mHandler.sendMessage(msg);
-            }
-        }).start();
-
-    }
 
     private void initConnectView() {
-        userEdt = findViewById(R.id.user);
-        pwdEdt = findViewById(R.id.pwd);
+        final EditText userEdt = findViewById(R.id.user);
+        final EditText pwdEdt = findViewById(R.id.pwd);
 
-        RadioGroup userGroup = findViewById(R.id.user_group);
+        final RadioGroup userGroup = findViewById(R.id.user_group);
 
         userGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 
@@ -580,29 +553,20 @@ public class MainActivity extends FragmentActivity {
                     case R.id.root_user:
                         userEdt.setText("root");
                         pwdEdt.setText("");
-
                         pwdEdt.setVisibility(View.VISIBLE);
-
-                        client.userType = 0;
-
+                        userType = 0;
                         break;
                     case R.id.normal_user:
                         userEdt.setText("");
                         pwdEdt.setText("");
                         pwdEdt.setVisibility(View.VISIBLE);
-
-                        client.userType = 1;
-
+                        userType = 1;
                         break;
                     case R.id.guest_user:
                         userEdt.setText("guest");
-
                         pwdEdt.setVisibility(View.INVISIBLE);
-
-                        client.userType = 2;
-
+                        userType = 2;
                         break;
-
                 }
             }
         });
@@ -613,50 +577,39 @@ public class MainActivity extends FragmentActivity {
             public void onClick(View v) {
                 String user = userEdt.getText().toString();
                 String pwd = pwdEdt.getText().toString();
-                int userID = client.userID;
 
-                if (client.userType == 2) {
-                    connectServer(0xfffe, null, null);
-                    return;
-                }
-                if (user == null || user.equals("")) {
-                    toast.setText("请输入用户名");
-                    toast.show();
-                    return;
-                }
-                if (pwd == null || pwd.equals("")) {
-                    toast.setText("请输入密码");
-                    toast.show();
-                    return;
-                }
-
-                if (user.matches("^\\d+$")) {
-                    userID = Integer.parseInt(user);
-                    if (client.userType == 1) {
-                        if (userID < 10000 || userID >= 20000) {
-                            toast.setText("不在普通用户范围内");
-                            toast.show();
-                            return;
-                        }
-                    } else if (userID > 0 && userID < 100 || userID >= 10000) {
-                        toast.setText("不在管理员账户范围内");
+                if (userType == 2) {
+                    userName = "guest";
+                    password = "";
+                } else {
+                    if (user.equals("")) {
+                        toast.setText("请输入用户名");
                         toast.show();
                         return;
                     }
-
-                    connectServer(userID, null, pwd);
-                    return;
+                    if (pwd.equals("")) {
+                        toast.setText("请输入密码");
+                        toast.show();
+                        return;
+                    }
+                    if (!user.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+                        toast.setText("用户名格式不正确");
+                        toast.show();
+                        return;
+                    }
                 }
-                if (user.matches("[A-Za-z_][A-Za-z0-9_]*")) {
-                    connectServer(1, user, pwd);
-                    return;
-                }
-                toast.setText("用户名格式不正确");
-                toast.show();
-
-
+                // start to connect
+                loadDialog = DialogUtils.createLoadingDialog(MainActivity.this, "连接中...");
+                applyDim(0.2f);
+                new Thread(new Runnable() {
+                    public void run() {
+                        client = new Client(serverAddr, userName, password);
+                        client.setMainActivity(MainActivity.this);
+                        client.setMainHandler(mHandler);
+                        client.start();
+                    }
+                }).start();
             }
-
         });
 
         TextView serverIpTv = findViewById(R.id.server_ip);
@@ -681,14 +634,13 @@ public class MainActivity extends FragmentActivity {
 
     private void setSelect(int i) {
         FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction transaction = fm.beginTransaction();//创建一个事务
-        if (idx != FRAG_MAX) {
-            fc[idx].dismiss(transaction);
+        FragmentTransaction transaction = fm.beginTransaction(); // 创建一个事务
+        if (fragIndex != FRAG_MAX) {
+            fc[fragIndex].dismiss(transaction);
         }
-        idx = i;
-        if (idx != FRAG_MAX) {
-
-            fc[idx].display(transaction);
+        fragIndex = i;
+        if (fragIndex != FRAG_MAX) {
+            fc[fragIndex].display(transaction);
         }
         transaction.commit();//提交事务
     }
@@ -723,20 +675,19 @@ public class MainActivity extends FragmentActivity {
             if (fragTab != null) {
                 transaction.hide(fragTab);
                 tv.setTextColor(getResources().getColor(R.color.dark_grey));
-                //img.setImageDrawable(getResources().getDrawable(primaryImgSrc));
+                // img.setImageDrawable(getResources().getDrawable(primaryImgSrc));
             }
         }
 
         public void display(FragmentTransaction transaction) {
             if (fragTab == null) {
-
                 createFragment();
-                transaction.add(R.id.frag_content, fragTab);//添加到Activity
+                transaction.add(R.id.frag_content, fragTab); // 添加到Activity
             } else {
                 transaction.show(fragTab);
             }
             tv.setTextColor(getResources().getColor(R.color.deep_blue));
-            //img.setImageDrawable(getResources().getDrawable(selectedImgSrc));
+            // img.setImageDrawable(getResources().getDrawable(selectedImgSrc));
             titleTv.setText(label);
         };
 
@@ -744,10 +695,9 @@ public class MainActivity extends FragmentActivity {
             if (fragTab == null)
                 return;
             FragmentManager fm = getSupportFragmentManager();
-            FragmentTransaction transaction = fm.beginTransaction();//创建一个事务
+            FragmentTransaction transaction = fm.beginTransaction(); // 创建一个事务
             transaction.remove(fragTab);
-            transaction.commit();//提交事务
-
+            transaction.commit(); // 提交事务
             fragTab = null;
         }
 
@@ -765,7 +715,6 @@ public class MainActivity extends FragmentActivity {
                 case 3:
                     fragTab = FourthFragment.newInstance();
                     break;
-
                 default:
                     break;
             }

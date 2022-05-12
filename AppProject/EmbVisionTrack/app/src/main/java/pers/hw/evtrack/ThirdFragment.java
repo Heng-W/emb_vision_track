@@ -51,10 +51,9 @@ public class ThirdFragment extends Fragment {
             // TODO: Implement this method
             switch (msg.what) {
                 case 1:
-
                     break;
                 case 15:
-                    client.writeToServer(Command.message);
+                    client.send(Command.MESSAGE);
                     break;
                 case 22:
                     anglehTv.setText("水平角:" + client.angleH + "°");
@@ -77,7 +76,6 @@ public class ThirdFragment extends Fragment {
                         heightTv.setText("高度:" + client.height);
 
                     }
-
 
                     break;
                 default:
@@ -191,7 +189,7 @@ public class ThirdFragment extends Fragment {
 
         @Override
         public void run() {
-            while (client.isConnected) {
+            while (client.connection() != null) {
                 try {
                     Message msg = new Message();
                     msg.what = 15;
@@ -219,11 +217,11 @@ public class ThirdFragment extends Fragment {
 
 
     private float getAnglehOfs() {
-        return client.DEFAULT_ANGLE_H - client.angleH;
+        return client.angleHDefault - client.angleH;
     }
 
     private float getAnglevOfs() {
-        return client.angleV - client.DEFAULT_ANGLE_V;
+        return client.angleV - client.angleVDefault;
     }
 
     private int getXposOfs() {
@@ -243,7 +241,6 @@ public class ThirdFragment extends Fragment {
 
     }
 
-
     private void stopTimer() {
         if (timer != null) {
             if (timer.isAlive()) {
@@ -252,6 +249,5 @@ public class ThirdFragment extends Fragment {
             timer = null;
         }
     }
-
 
 }

@@ -32,6 +32,7 @@ public class Client extends TcpClient {
                         conn.getPeerAddr().toString() + " is " +
                         (conn.isConnected() ? "UP" : "DOWN"));
                 if (conn.isConnected()) {
+                    Client.this.userName = userName;
                     Buffer buf = createBuffer(Command.LOGIN);
                     buf.appendInt32(userName.length());
                     buf.append(userName.getBytes());
@@ -177,11 +178,11 @@ public class Client extends TcpClient {
     public float angleH, angleV;
     public float[][] pidParams = new float[4][2];
 
+    int clientCnt = 0;
+
     public int userID;
     public String userName;
     public int userType;
-
-    
 
     /*
     public class Rect {
@@ -195,8 +196,27 @@ public class Client extends TcpClient {
         // Log.d("cmd", cmd.toString());
         switch (cmd) {
             case LOGIN:{
-                Message msg = mHandler.obtainMessage(12, in.readInt(), 0);
-                mHandler.sendMessage(msg);
+                final byte[] b = new byte[in.available()];
+                in.read(b);
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ByteArrayInputStream bis = new ByteArrayInputStream(b);
+                            DataInputStream in = new DataInputStream(bis);
+
+                            int ret = in.readInt();
+                            if (ret == 0) {
+                                userID = in.readInt();
+                                userType = in.readUnsignedByte();
+                            }
+                            Message msg = mHandler.obtainMessage(12, ret, 0);
+                            mHandler.sendMessage(msg);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 break;
             }
             case INIT: {
@@ -464,6 +484,16 @@ public class Client extends TcpClient {
             case LOGOUT: {
                 Message msg = mHandler.obtainMessage(7);
                 mHandler.sendMessage(msg);
+                break;
+            }
+            case GET_CLIENT_CNT: {
+                final int cnt = in.readInt();
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        clientCnt = cnt;
+                    }
+                });
                 break;
             }
         }

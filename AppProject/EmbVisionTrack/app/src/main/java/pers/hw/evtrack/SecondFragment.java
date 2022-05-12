@@ -18,6 +18,8 @@ import android.widget.*;
 import android.util.Log;
 
 import java.io.*;
+
+import pers.hw.evtrack.net.Buffer;
 import pers.hw.evtrack.view.ImageSurfaceView;
 import pers.hw.evtrack.view.RoundMenuView;
 
@@ -85,13 +87,7 @@ public class SecondFragment extends Fragment {
 
                     //toast.setText(String.valueOf(newBitmap.getAllocationByteCount()));
                     //toast.show();
-                    cameraImage.setImageBitmap(client.bitmap);
-
-                    if (bitmap != null)
-                        bitmap.recycle();
-                    bitmap = client.bitmap;
-
-
+                    cameraImage.setImageBitmap((Bitmap)msg.obj);
                     break;
 
                 case 11:
@@ -107,10 +103,8 @@ public class SecondFragment extends Fragment {
                     }
                     break;
                 case 15:
-                    client.writeToServer(Command.image);
-
+                    client.send(Command.IMAGE);
                     break;
-
                 case 21:
                     if (client.trackFlag) {
                         trackCtlBtn.setText("停止追踪");
@@ -123,24 +117,17 @@ public class SecondFragment extends Fragment {
                         toast.setText("设置成功");
                     } else {
                         if (client.trackFlag) {
-
                             toast.setText("ID为" + msg.arg1 + "的用户开启了追踪");
                         } else {
                             toast.setText("ID为" + msg.arg1 + "的用户关闭了追踪");
-
                         }
-
                     }
-
                     toast.show();
                     break;
-
                 case 22:
                     toast.setText("设置成功");
                     toast.show();
-
                     break;
-
                 case 24:
                     if (client.fieldAutoCtlFlag) {
                         panModeTv.setText("云台模式：自动");
@@ -271,9 +258,9 @@ public class SecondFragment extends Fragment {
                     return;
                 }
                 if (client.trackFlag) {
-                    client.writeToServer(Command.stop_track);
+                    client.send(Command.STOP_TRACK);
                 } else {
-                    client.writeToServer(Command.start_track);
+                    client.send(Command.START_TRACK);
 
                 }
 
@@ -316,16 +303,12 @@ public class SecondFragment extends Fragment {
                     return;
                 }
 
-                Packet p = client.newPacket(Command.set_target);
-                p.writeUint16((int)(x * Client.IMAGE_W));
-                p.writeUint16((int)(y * Client.IMAGE_H));
-                p.writeUint16((int)(w * Client.IMAGE_W));
-                p.writeUint16((int)(h * Client.IMAGE_H));
-                try {
-                    client.sendPacket(p);
-                } catch (IOException e) {
-                    Log.v("IOExp", "set target");
-                }
+                Buffer buf = Client.createBuffer(Command.SET_TARGET);
+                buf.appendInt16((int)(x * Client.IMAGE_W));
+                buf.appendInt16((int)(y * Client.IMAGE_H));
+                buf.appendInt16((int)(w * Client.IMAGE_W));
+                buf.appendInt16((int)(h * Client.IMAGE_H));
+                client.send(buf);
                 imageSurface.disableDraw();
 
                 setTargetBtn.setText("选择目标");
@@ -354,9 +337,9 @@ public class SecondFragment extends Fragment {
                     return;
                 }
                 if (client.fieldAutoCtlFlag) {
-                    client.writeToServer(Command.disable_field_autoctl);
+                    client.send(Command.DISABLE_FIELD_AUTOCTL);
                 } else {
-                    client.writeToServer(Command.enable_field_autoctl);
+                    client.send(Command.ENABLE_FIELD_AUTOCTL);
 
                 }
 
@@ -382,17 +365,14 @@ public class SecondFragment extends Fragment {
                         angleVSet -= 5;
                         break;
                     case 1:
-
                         angleHSet -= 5;
 
                         break;
                     case 2:
-
                         angleVSet += 5;
 
                         break;
                     case 3:
-
                         angleHSet += 5;
 
                         break;
@@ -405,17 +385,10 @@ public class SecondFragment extends Fragment {
                 if (angleVSet > 180) angleVSet = 180;
                 else if (angleVSet < 0) angleVSet = 0;
 
-                Packet p = client.newPacket(Command.set_servo_val);
-                p.writeInt32((int)(angleHSet * 100));
-                p.writeInt32((int)(angleVSet * 100));
-                try {
-                    client.sendPacket(p);
-                } catch (IOException e) {
-                    Log.v("set_servo_val", e.toString());
-                }
-
-
-
+                Buffer buf = Client.createBuffer(Command.SET_SERVO_VAL);
+                buf.appendFloat(angleHSet);
+                buf.appendFloat(angleVSet);
+                client.send(buf);
             }
         });
 
@@ -476,7 +449,7 @@ public class SecondFragment extends Fragment {
 
         @Override
         public void run() {
-            while (client.isConnected) {
+            while (client.connection() != null) {
                 try {
                     Message msg = new Message();
                     msg.what = 15;
