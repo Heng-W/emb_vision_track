@@ -106,13 +106,17 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
             conn->shutdown();
             return;
         }
-        uint8_t type = in.readFixed8<uint8_t>();
         std::string userName = in.readString();
         std::string pwd = in.readString();
-        int errorCode = checkAccountByUserName(type, userName, pwd, &userId_);
+        int errorCode = checkAccountByUserName(userName, pwd, &userId_, &type_);
 
         Buffer buf = createBuffer(cmd);
         buf.appendUInt32(errorCode);
+        if (errorCode == 0)
+        {
+            buf.appendUInt32(userId_);
+            buf.appendUInt8(type_);
+        }
         packBuffer(&buf);
         conn->send(std::move(buf));
         if (errorCode != 0)

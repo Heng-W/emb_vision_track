@@ -28,6 +28,7 @@ private:
     net::BroadcastService* broadcastService_;
     bool login_;
     uint32_t userId_;
+    uint8_t type_;
 };
 
 using SessionPtr = std::shared_ptr<Session>;

@@ -5,8 +5,8 @@
 
 namespace evt
 {
-    
-int checkAccountByUserName(uint8_t type, const std::string& userName, const std::string& pwd, uint32_t* userId);
+
+int checkAccountByUserName(const std::string& userName, const std::string& pwd, uint32_t* userId, uint8_t* type);
 
 int checkAccountById(uint32_t id, const std::string& pwd, std::string* userName);
 
