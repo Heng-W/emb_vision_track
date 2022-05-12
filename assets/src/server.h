@@ -18,6 +18,9 @@ public:
 
     void start() { server_.start(); }
 
+    net::EventLoop* getLoop() const { return server_.getLoop(); }
+    const net::TcpServer::ConnectionMap& connections() const { return server_.connections(); }
+
     void addUser(uint32_t userId, const std::weak_ptr<Session>& session)
     {
         std::lock_guard<std::mutex> lock(mutex_);

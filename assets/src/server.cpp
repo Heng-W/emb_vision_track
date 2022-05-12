@@ -10,7 +10,7 @@ namespace evt
 Server::Server(net::EventLoop* loop,
                const net::InetAddress& listenAddr)
     : server_(loop, listenAddr),
-      broadcastService_(loop)
+      broadcastService_(&server_)
 {
     server_.setConnectionCallback([this](const net::TcpConnectionPtr & conn)
     {
@@ -19,7 +19,6 @@ Server::Server(net::EventLoop* loop,
                   << (conn->connected() ? "UP" : "DOWN");
         if (conn->connected())
         {
-            broadcastService_.addConnection(conn);
             SessionPtr session(new Session(this, conn));
             std::lock_guard<std::mutex> lock(mutex_);
             assert(sessions_.find(conn->id()) == sessions_.end());
@@ -27,7 +26,6 @@ Server::Server(net::EventLoop* loop,
         }
         else
         {
-            broadcastService_.removeConnection(conn);
             std::lock_guard<std::mutex> lock(mutex_);
             assert(sessions_.find(conn->id()) != sessions_.end());
             sessions_.erase(conn->id());

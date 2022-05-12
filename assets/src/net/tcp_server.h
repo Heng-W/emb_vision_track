@@ -17,6 +17,7 @@ class TcpServer
 {
 public:
     using ThreadInitCallback = std::function<void(EventLoop*)>;
+    using ConnectionMap = std::unordered_map<int64_t, TcpConnectionPtr>;
 
     enum Option { kNoReusePort, kReusePort };
 
@@ -64,8 +65,10 @@ public:
     void setName(const std::string& name) { name_ = name; }
     const std::string& name() const { return name_; }
 
+    // not thread safe, should use it in baseLoop
+    const ConnectionMap& connections() const { return connections_; }
+
 private:
-    using ConnectionMap = std::unordered_map<int64_t, TcpConnectionPtr>;
 
     void newConnection(int sockfd, const InetAddress& peerAddr);
     void removeConnection(const TcpConnectionPtr& conn);

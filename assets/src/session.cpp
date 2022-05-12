@@ -4,6 +4,7 @@
 #include "util/singleton.hpp"
 #include "util/logger.h"
 #include "util/sys_cmd.h"
+#include "net/event_loop.h"
 #include "vision/vision_event_loop.h"
 #include "control/control_event_loop.h"
 #include "data_stream.h"
@@ -216,7 +217,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
             buf2.appendUInt8(1);
             packBuffer(&buf2);
-            broadcastService_->broadcastExcept(std::move(buf2), conn);
+            broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             break;
         }
         case Command::MESSAGE:
@@ -271,7 +272,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
             buf2.appendUInt8(1);
             packBuffer(&buf2);
-            broadcastService_->broadcastExcept(std::move(buf2), conn);
+            broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             break;
         }
         case Command::STOP_TRACK:
@@ -289,7 +290,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
             buf2.appendUInt8(1);
             packBuffer(&buf2);
-            broadcastService_->broadcastExcept(std::move(buf2), conn);
+            broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             break;
         }
         case Command::SET_TARGET:
@@ -325,7 +326,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
                 buf2.appendUInt8(1);
                 packBuffer(&buf2);
-                broadcastService_->broadcastExcept(std::move(buf2), conn);
+                broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             });
             break;
         }
@@ -344,7 +345,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
                 buf2.appendUInt8(1);
                 packBuffer(&buf2);
-                broadcastService_->broadcastExcept(std::move(buf2), conn);
+                broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             });
             break;
         }
@@ -362,7 +363,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
                 buf2.appendUInt8(1);
                 packBuffer(&buf2);
-                broadcastService_->broadcastExcept(std::move(buf2), conn);
+                broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             });
             break;
         case Command::DISABLE_MOTION_AUTOCTL:
@@ -379,7 +380,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
                 buf2.appendUInt8(1);
                 packBuffer(&buf2);
-                broadcastService_->broadcastExcept(std::move(buf2), conn);
+                broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             });
             break;
         case Command::STOP_MOTOR:
@@ -442,7 +443,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
                 buf2.appendUInt8(1);
                 packBuffer(&buf2);
-                broadcastService_->broadcastExcept(std::move(buf2), conn);
+                broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             });
             break;
         case Command::DISABLE_FIELD_AUTOCTL:
@@ -464,7 +465,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
                 buf2.appendUInt8(1);
                 packBuffer(&buf2);
-                broadcastService_->broadcastExcept(std::move(buf2), conn);
+                broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             });
             break;
         case Command::SET_SERVO_VAL:
@@ -530,7 +531,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
                 buf2.appendUInt8(1);
                 packBuffer(&buf2);
-                broadcastService_->broadcastExcept(std::move(buf2), conn);
+                broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             });
             break;
         }
@@ -567,7 +568,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
 
                 buf2.appendUInt8(1);
                 packBuffer(&buf2);
-                broadcastService_->broadcastExcept(std::move(buf2), conn);
+                broadcastService_->broadcastExcept(std::move(buf2), conn->id());
             });
             break;
         }
@@ -625,7 +626,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
             buf.appendUInt32(str.size());
             buf.append(str.data(), str.size());
             packBuffer(&buf);
-            broadcastService_->broadcastExcept(std::move(buf), conn);
+            broadcastService_->broadcastExcept(std::move(buf), conn->id());
             break;
         }
         case Command::SYSTEM_CMD:
@@ -638,6 +639,18 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
             buf.append(res.data(), res.size());
             packBuffer(&buf);
             conn->send(std::move(buf));
+            break;
+        }
+        case Command::UPDATE_CLIENT_CNT:
+        {
+            server_->getLoop()->runInLoop([this, conn, cmd]
+            {
+                int clientCnt = server_->connections().size();
+                Buffer buf = createBuffer(cmd);
+                buf.appendUInt32(clientCnt);
+                packBuffer(&buf);
+                conn->send(std::move(buf));
+            });
             break;
         }
         case Command::HALT:

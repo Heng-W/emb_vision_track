@@ -4,41 +4,15 @@
 #include "net/event_loop.h"
 #include "net/buffer.h"
 #include "net/tcp_connection.h"
-
+#include "net/tcp_server.h"
 
 namespace net
 {
 
-BroadcastService::BroadcastService(EventLoop* loop)
-    : loop_(loop)
+BroadcastService::BroadcastService(TcpServer* server)
+    :server_(server),
+      loop_(server->getLoop())
 {
-}
-
-
-void BroadcastService::addConnection(const TcpConnectionPtr& conn)
-{
-    TcpConnectionWeakptr connWeakptr = conn;
-    loop_->runInLoop([this, connWeakptr]()
-    {
-        connections_.insert(connWeakptr);
-    });
-}
-
-void BroadcastService::removeConnection(const TcpConnectionPtr& conn)
-{
-    TcpConnectionWeakptr connWeakptr = conn;
-    loop_->runInLoop([this, connWeakptr]()
-    {
-        connections_.erase(connWeakptr);
-    });
-}
-
-void BroadcastService::clearConnection()
-{
-    loop_->runInLoop([this]()
-    {
-        connections_.clear();
-    });
 }
 
 void BroadcastService::broadcast(const void* data, int len)
@@ -49,7 +23,7 @@ void BroadcastService::broadcast(const void* data, int len)
     }
     else
     {
-        auto buf = std::make_shared<Buffer>(len, 0);
+        auto buf = std::make_shared<Buffer>(len);
         buf->append(data, len);
         loop_->queueInLoop([this, buf]
         {
@@ -66,7 +40,7 @@ void BroadcastService::broadcast(const void* data, int len, const Predicate& pre
     }
     else
     {
-        auto buf = std::make_shared<Buffer>(len, 0);
+        auto buf = std::make_shared<Buffer>(len);
         buf->append(data, len);
         loop_->queueInLoop([this, buf, pred]
         {
@@ -142,22 +116,20 @@ void BroadcastService::broadcast(Buffer&& buf, const Predicate& pred)
 void BroadcastService::broadcastInLoop(const void* data, int len)
 {
     assert(loop_->isInLoopThread());
-    for (const auto& x : connections_)
+    for (const auto& x : server_->connections())
     {
-        auto guard = x.lock();
-        if (guard) guard->send(data, len);
+        x.second->send(data, len);
     }
 }
 
 void BroadcastService::broadcastInLoop(const void* data, int len, const Predicate& pred)
 {
     assert(loop_->isInLoopThread());
-    for (const auto& x : connections_)
+    for (const auto& x : server_->connections())
     {
-        if (pred(x))
+        if (pred(x.second->id()))
         {
-            auto guard = x.lock();
-            if (guard) guard->send(data, len);
+            x.second->send(data, len);
         }
     }
 }
