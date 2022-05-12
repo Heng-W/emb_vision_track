@@ -174,17 +174,14 @@ public class Client extends TcpClient {
     public int leftCtlVal;
     public int rightCtlVal;
 
-
     public float angleH, angleV;
     public float[][] pidParams = new float[4][2];
+
     public int userID;
     public String userName;
     public int userType;
 
-
-
-
-
+    
 
     /*
     public class Rect {
@@ -274,20 +271,32 @@ public class Client extends TcpClient {
                 break;
             }
             case MESSAGE: {
-                Bundle bundle = new Bundle();
-                bundle.putFloat("angleH", in.readFloat());
-                bundle.putFloat("angleV", in.readFloat());
-                
-                bundle.putInt("leftCtlVal", in.readInt());
-                bundle.putInt("rightCtlVal", in.readInt());
-                
-                int[] result = new int[4];
-                for (int i = 0; i < 4; i++) {
-                    result[i] = in.readInt();
-                }
-                bundle.putIntArray("result", result);
-                
-                sendToFragment(2, 22, bundle);
+                final byte[] b = new byte[in.available()];
+                in.read(b);
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ByteArrayInputStream bis = new ByteArrayInputStream(b);
+                            DataInputStream in = new DataInputStream(bis);
+
+                            angleH = in.readFloat();
+                            angleV = in.readFloat();
+
+                            leftCtlVal = in.readInt();
+                            rightCtlVal = in.readInt();
+
+                            xpos = in.readInt();
+                            ypos = in.readInt();
+                            width = in.readInt();
+                            height = in.readInt();
+
+                            sendToFragment(2, 22);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 break;
             }
             case IMAGE: {
@@ -306,11 +315,20 @@ public class Client extends TcpClient {
                 result.width = in.readInt();
                 result.height = in.readInt();
                 */
-                int[] result = new int[4];
+                final int[] result = new int[4];
                 for (int i = 0; i < 4; i++) {
                     result[i] = in.readInt();
                 }
-                sendToFragment(1, 11, result);
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        xpos = result[0];
+                        ypos = result[1];
+                        width = result[2];
+                        height = result[3];
+                        sendToFragment(1, 11);
+                    }
+                });
                 break;
             }
             case START_TRACK: {
@@ -358,12 +376,18 @@ public class Client extends TcpClient {
             }
             case DISABLE_FIELD_AUTOCTL: {
                 // fieldAutoCtlFlag = false;
-                Bundle bundle = new Bundle();
-                bundle.putFloat("angleH", in.readFloat());
-                bundle.putFloat("angleV", in.readFloat());
-                bundle.putFloat("flag", in.readUnsignedByte());
-                
-                sendToFragment(1, 24, bundle);
+                final float val1 = in.readFloat();
+                final float val2 = in.readFloat();
+                final int flag = in.readUnsignedByte();
+
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        angleH = val1;
+                        angleV = val2;
+                        sendToFragment(1, 24, flag);
+                    }
+                });
                 break;
             }
             case SET_SERVO_VAL: {
@@ -379,11 +403,32 @@ public class Client extends TcpClient {
                 break;
             }
             case UPDATE_PID: {
+                /*
                 float[] pidParams = new float[8];
                 for (int i = 0; i < 8; i++) {
                     pidParams[i] = in.readFloat();
                 }
                 sendToFragment(0, 20, pidParams);
+                 */
+                final byte[] b = new byte[in.available()];
+                in.read(b);
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ByteArrayInputStream bis = new ByteArrayInputStream(b);
+                            DataInputStream in = new DataInputStream(bis);
+                            for (int i = 0; i < 4; i++) {
+                                for (int j = 0; j < 2; j++) {
+                                    pidParams[i][j] = in.readFloat();
+                                }
+                            }
+                            sendToFragment(0, 20);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 break;
             }
             case SYSTEM_CMD: {
