@@ -1,12 +1,11 @@
 
 #include "vision_event_loop.h"
 
-
 #include "opencv2/opencv.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/imgproc/types_c.h"
 #include "opencv2/imgcodecs/legacy/constants_c.h"
-//#include "opencv2/videoio/legacy/constants_c.h"
+// #include "opencv2/videoio/legacy/constants_c.h"
 
 #include "video_device.h"
 #include "yuyv2bgr.h"
@@ -16,22 +15,20 @@
 namespace evt
 {
 
-constexpr int kTargetDefaultWidth = 100;
-
 constexpr int JPEG_QUALITY_DEFAULT_VALUE = 80;
-const std::vector<int> qualityOption = {CV_IMWRITE_JPEG_QUALITY, JPEG_QUALITY_DEFAULT_VALUE}; // 压缩
-
+// 压缩参数
+const std::vector<int> qualityOption = {CV_IMWRITE_JPEG_QUALITY, JPEG_QUALITY_DEFAULT_VALUE};
 
 static std::unique_ptr<cv::Mat> imageBuf_;
 
 
 VisionEventLoop::VisionEventLoop()
-    : trackResult_{0, 0, kTargetDefaultWidth, kTargetDefaultWidth},
-      quit_(false),
+    : trackResult_{0, 0, 0, 0},
       enableTrack_(false),
       initTracker_(true),
       resetTracker_(false),
       enableMultiScale_(false),
+      quit_(false),
       imageWidth_(0),
       imageHeight_(0)
 {
@@ -62,7 +59,8 @@ bool VisionEventLoop::openDevice(const char* deviceName)
         }
         else if (type == ImageType::BGR)
         {
-            std::unique_ptr<cv::Mat> frame(new cv::Mat(height, width, CV_8UC3, data));
+            cv::Mat img(height, width, CV_8UC3, data);
+            std::unique_ptr<cv::Mat> frame(new cv::Mat(img.clone()));
 
             std::lock_guard<std::mutex> lock(mutex_);
             imageBuf_ = std::move(frame);

@@ -17,7 +17,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(MotionControl);
 
-    bool openDevice(const char* deviceName);
+    bool openDevice(const char* deviceName = "/dev/motor");
 
     void perform();
 

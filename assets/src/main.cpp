@@ -13,9 +13,6 @@ int main()
 {
     util::ConfigFileReader config("conf/var.conf");
 
-    const char* portStr = config.get("listen_port");
-    uint16_t port = portStr ? static_cast<uint16_t>(atoi(portStr)) : 18825;
-
     VisionEventLoop& visionEventLoop = util::Singleton<VisionEventLoop>::instance();
     ControlEventLoop& controlEventLoop = util::Singleton<ControlEventLoop>::instance();
 
@@ -25,22 +22,26 @@ int main()
 
     const char* servoDevice = config.get("servo_device");
     if (!servoDevice) servoDevice = "/dev/servo";
-    controlEventLoop.fieldControl().openDevice(videoDevice);
+    controlEventLoop.fieldControl().openDevice(servoDevice);
 
     const char* motorDevice = config.get("motor_device");
     if (!motorDevice) motorDevice = "/dev/motor";
     controlEventLoop.motionControl().openDevice(motorDevice);
 
-    std::thread visionThread([&visionEventLoop]()
+    std::thread visionThread([&visionEventLoop]
     {
         visionEventLoop.loop();
     });
-    std::thread controlThread([&controlEventLoop]()
+    std::thread controlThread([&controlEventLoop]
     {
         controlEventLoop.loop();
     });
 
     net::EventLoop loop;
+
+    const char* portStr = config.get("listen_port");
+    uint16_t port = portStr ? static_cast<uint16_t>(atoi(portStr)) : 18825;
+
     Server server(&loop, net::InetAddress(port));
     server.start();
     loop.loop();
