@@ -143,23 +143,21 @@ public class TcpClient {
         }
     }
 
+    private void doConnectionCallback(TcpConnection conn) {
+        if (callbacks != null) {
+            callbacks.onConnection(conn);
+        } else {
+            logger.info(conn.getLocalAddr().toString() + " -> " +
+                    conn.getPeerAddr().toString() + " is " +
+                    (conn.isConnected() ? "UP" : "DOWN"));
+        }
+    }
+
     private void newConnection(Socket socket) {
         SocketAddress peerAddr = socket.getRemoteSocketAddress();
         TcpConnection conn = new TcpConnection(socket, peerAddr);
 
         conn.setCallbacks(new TcpConnection.Callbacks() {
-
-            @Override
-            public void onConnection(TcpConnection conn) {
-                if (callbacks != null) {
-                    callbacks.onConnection(conn);
-                } else {
-                    logger.info(conn.getLocalAddr().toString() + " -> " +
-                            conn.getPeerAddr().toString() + " is " +
-                            (conn.isConnected() ? "UP" : "DOWN"));
-                }
-            }
-
             @Override
             public void onMessage(TcpConnection conn, Buffer buf) {
                 if (callbacks != null) {
@@ -175,19 +173,21 @@ public class TcpClient {
                     callbacks.onWriteComplete(conn);
                 }
             }
-
         });
 
         synchronized (this) {
             connection = conn;
         }
         if (!connect) return;
+
         conn.connectEstablished();
 
         synchronized (this) {
             recv = true;
             notify();
         }
+
+        doConnectionCallback(conn);
 
         conn.doSendEvent();
 
@@ -201,7 +201,9 @@ public class TcpClient {
             }
             connection = null;
         }
+
         conn.connectDestroyed();
+        doConnectionCallback(conn);
 
         logger.info("removeConnection");
         if (retry && connect) {

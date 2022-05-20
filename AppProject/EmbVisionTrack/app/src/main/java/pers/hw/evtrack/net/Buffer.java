@@ -8,11 +8,11 @@ public class Buffer {
     private int writerIndex;
 
     public Buffer() {
-        this(1024, 8);
+        this(1024, 0);
     }
 
     public Buffer(int initialSize) {
-        this(initialSize, 8);
+        this(initialSize, 0);
     }
 
     public Buffer(int initialSize, int prependSize) {

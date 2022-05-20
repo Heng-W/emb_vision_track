@@ -9,8 +9,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import pers.hw.evtrack.Command;
-
 public class TcpConnection {
 
     private static final Logger logger = Logger.getLogger(TcpConnection.class.getName());
@@ -19,6 +17,7 @@ public class TcpConnection {
 
     private final AtomicInteger state = new AtomicInteger();
     private final Socket socket;
+    private final long sendThreadId;
 
     private final SocketAddress localAddr;
     private final SocketAddress peerAddr;
@@ -37,7 +36,6 @@ public class TcpConnection {
     }
 
     public interface Callbacks {
-        void onConnection(TcpConnection conn);
 
         void onMessage(TcpConnection conn, Buffer buf);
 
@@ -47,6 +45,7 @@ public class TcpConnection {
     TcpConnection(Socket socket, SocketAddress peerAddr) {
         setState(State.kConnecting);
         this.socket = socket;
+        this.sendThreadId = Thread.currentThread().getId();
         this.localAddr = socket.getLocalSocketAddress();
         this.peerAddr = peerAddr;
         logger.fine("Create TcpConnection");
@@ -74,34 +73,46 @@ public class TcpConnection {
 
     public void send(byte[] data, int off, int len) {
         if (state.get() == State.kConnected.ordinal()) {
-            try {
-                Buffer buf = new Buffer(len, 0);
+            if (isInSendThread()) {
+                sendInThread(data, off, len);
+            } else {
+                Buffer buf = new Buffer(len);
                 buf.append(data, off, len);
-                buffersToSend.put(buf);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                try {
+                    buffersToSend.put(buf);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
     public void send(String data) {
         if (state.get() == State.kConnected.ordinal()) {
-            try {
-                Buffer buf = new Buffer(data.length(), 0);
+            if (isInSendThread()) {
+                sendInThread(data.getBytes(), 0, data.length());
+            } else {
+                Buffer buf = new Buffer(data.length());
                 buf.append(data.getBytes());
-                buffersToSend.put(buf);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                try {
+                    buffersToSend.put(buf);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
     public void send(Buffer buf) {
         if (state.get() == State.kConnected.ordinal()) {
-            try {
-                buffersToSend.put(buf);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (isInSendThread()) {
+                sendInThread(buf.data(), buf.peek(), buf.readableBytes());
+            } else {
+                try {
+                    buffersToSend.put(buf);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -120,7 +131,7 @@ public class TcpConnection {
     }
 
     public void doSendEvent() {
-        while (state.get() == State.kConnected.ordinal()) {
+        while (true) {
             Buffer buf;
             try {
                 buf = buffersToSend.take();
@@ -129,22 +140,27 @@ public class TcpConnection {
                 break;
             }
             logger.finest(stateToString());
-            if (state.get() != State.kConnected.ordinal() ||
-                    !sendInThread(buf.data(), buf.peek(), buf.readableBytes())) {
+            if (state.get() == State.kDisconnected.ordinal()) {
+                logger.warning("disconnected, give up writing");
+                return;
+            }
+            if (buf.readableBytes() > 0) {
+                if (!sendInThread(buf.data(), buf.peek(), buf.readableBytes())) {
+                    break;
+                }
+            } else if (state.get() == State.kDisconnecting.ordinal()) {
                 break;
             }
         }
-        setState(State.kDisconnecting);
         try {
             socket.shutdownOutput();
-            socket.shutdownInput();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void doRecvEvent() {
-        while (state.get() == State.kConnected.ordinal()) {
+        while (true) {
             inputBuffer.ensureWritableBytes(MAX_READ_SIZE);
             int n;
             try {
@@ -154,9 +170,6 @@ public class TcpConnection {
                 break;
             }
             logger.finest(stateToString());
-            if (state.get() != State.kConnected.ordinal()) {
-                break;
-            }
             if (n > 0) {
                 inputBuffer.hasWritten(n);
                 if (callbacks != null) {
@@ -169,9 +182,15 @@ public class TcpConnection {
                 break;
             }
         }
-        shutdown();
+        if (state.get() == State.kConnected.ordinal()) {
+            setState(State.kDisconnected);
+            try {
+                buffersToSend.put(new Buffer(0));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
-
 
     public void shutdown() {
         if (state.get() == State.kConnected.ordinal()) {
@@ -187,16 +206,10 @@ public class TcpConnection {
     public void connectEstablished() {
         assert(state.get() == State.kConnecting.ordinal());
         setState(State.kConnected);
-
-        if (callbacks != null) callbacks.onConnection(this);
     }
 
     public void connectDestroyed() {
-        assert(state.get() == State.kDisconnecting.ordinal());
         setState(State.kDisconnected);
-
-        if (callbacks != null) callbacks.onConnection(this);
-
         try {
             socket.close();
         } catch (IOException e) {
@@ -210,6 +223,10 @@ public class TcpConnection {
         } catch (SocketException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isInSendThread() {
+        return sendThreadId == Thread.currentThread().getId();
     }
 
     private void setState(State s) {
