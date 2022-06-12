@@ -12,10 +12,10 @@ vector<string> splitString(const string& str, const string& delim)
 {
     vector<string> res;
     auto start = str.cbegin();
-    while (str.cend() - start > 0)
+    while (start < str.cend())
     {
         auto it = std::search(start, str.cend(), delim.cbegin(), delim.cend());
-        res.emplace_back(&*start, it - start);
+        res.emplace_back(start, it);
         start = it + delim.size();
     }
     return res;
