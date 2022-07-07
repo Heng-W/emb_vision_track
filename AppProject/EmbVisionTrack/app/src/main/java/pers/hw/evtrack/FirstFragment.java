@@ -2,6 +2,8 @@ package pers.hw.evtrack;
 
 
 import androidx.fragment.app.Fragment;
+
+import android.annotation.SuppressLint;
 import android.widget.*;
 import android.os.Message;
 import android.os.Bundle;
@@ -15,6 +17,8 @@ import android.util.Log;
 import android.text.*;
 
 import java.io.*;
+
+import pers.hw.evtrack.net.Buffer;
 import pers.hw.evtrack.view.SteerView;
 
 
@@ -74,10 +78,9 @@ public class FirstFragment extends Fragment {
                     } else {
                         if (client.motionAutoCtlFlag) {
 
-                            toast.setText("ID为" + msg.arg1 + "的用户设置了自动驾驶");
+                            toast.setText("其他用户设置了自动驾驶");
                         } else {
-                            toast.setText("ID为" + msg.arg1 + "的用户设置了手动驾驶");
-
+                            toast.setText("其他用户设置了手动驾驶");
                         }
 
                     }
@@ -88,9 +91,8 @@ public class FirstFragment extends Fragment {
                     if (msg.arg1 == client.userID) {
                         toast.setText("设置成功");
                     } else {
-                        client.writeToServer(Command.update_pid);
+                        client.send(Command.UPDATE_PID);
                         toast.setText("ID为" + msg.arg1 + "的用户设置了PID参数");
-
                     }
                     toast.show();
                     break;
@@ -143,6 +145,7 @@ public class FirstFragment extends Fragment {
 
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initView() {
         driveModeTv =  view.findViewById(R.id.drive_mode);
         if (client.motionAutoCtlFlag) {
@@ -312,11 +315,9 @@ public class FirstFragment extends Fragment {
                     return;
                 }
                 if (client.motionAutoCtlFlag) {
-                    client.writeToServer(Command.disable_motion_autoctl);
-
+                    client.send(Command.DISABLE_MOTION_AUTOCTL);
                 } else {
-                    client.writeToServer(Command.enable_motion_autoctl);
-
+                    client.send(Command.ENABLE_MOTION_AUTOCTL);
                 }
             }
 
@@ -334,7 +335,7 @@ public class FirstFragment extends Fragment {
                     return;
                 }
 
-                client.writeToServer(Command.disable_motion_autoctl);
+                client.send(Command.DISABLE_MOTION_AUTOCTL);
                 leftCtlVal = 0;
                 rightCtlVal = 0;
                 writeMotorVal();
@@ -380,11 +381,7 @@ public class FirstFragment extends Fragment {
                         //延迟800ms，如果不再输入字符，则执行该线程的run方法
                         editHandler.postDelayed(delayRun, 1000);
 
-
                     }
-
-
-
                 });
             }
         }
@@ -418,22 +415,17 @@ public class FirstFragment extends Fragment {
 
     private void writeParam() {
         if (editStr == null) return;
-        Packet p;
+        Buffer buf;
 
         if (editIdx < 4) {
-            p = client.newPacket(Command.set_field_ctl_pid);
-            p.writeInt32(editIdx);
+            buf = Client.createBuffer(Command.SET_FIELD_CTL_PID);
+            buf.appendInt32(editIdx);
         } else {
-            p = client.newPacket(Command.set_motion_ctl_pid);
-            p.writeInt32(editIdx - 4);
-
+            buf = Client.createBuffer(Command.SET_MOTION_CTL_PID);
+            buf.appendInt32(editIdx - 4);
         }
-        p.writeFloat(Float.parseFloat(editStr));
-        try {
-            client.sendPacket(p);
-        } catch (IOException e) {
-            Log.v("set_motion_pid", e.toString());
-        }
+        buf.appendFloat(Float.parseFloat(editStr));
+        client.send(buf);
     }
 
 
@@ -441,16 +433,12 @@ public class FirstFragment extends Fragment {
         if (client.motionAutoCtlFlag || motorStopFlag)
             return;
 
-        Packet p = client.newPacket(Command.set_motor_val);
+        Buffer buf = Client.createBuffer(Command.SET_MOTOR_VAL);
 
-        p.writeInt32(leftCtlVal);
-        p.writeInt32(rightCtlVal);
+        buf.appendInt32(leftCtlVal);
+        buf.appendInt32(rightCtlVal);
 
-        try {
-            client.sendPacket(p);
-        } catch (IOException e) {
-            Log.v("set_motor_val", e.toString());
-        }
+        client.send(buf);
     }
 
     public void updateLeftVal() {
@@ -466,6 +454,5 @@ public class FirstFragment extends Fragment {
             rightCtlVal = -rightCtlVal;
         }
     }
-
 
 }

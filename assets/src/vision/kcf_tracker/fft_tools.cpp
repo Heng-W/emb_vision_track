@@ -1,13 +1,8 @@
 
 #include "fft_tools.h"
 
-
-namespace EVTrack
+namespace evt
 {
-
-namespace kcf
-{
-
 
 namespace FFTTools
 {
@@ -17,13 +12,12 @@ cv::Mat fftd(cv::Mat img, bool backwards)
     if (img.channels() == 1)
     {
         cv::Mat planes[] = {cv::Mat_<float> (img), cv::Mat_<float>::zeros(img.size())};
-        //cv::Mat planes[] = {cv::Mat_<double> (img), cv::Mat_<double>::zeros(img.size())};
+        // cv::Mat planes[] = {cv::Mat_<double> (img), cv::Mat_<double>::zeros(img.size())};
         cv::merge(planes, 2, img);
     }
     cv::dft(img, img, backwards ? (cv::DFT_INVERSE | cv::DFT_SCALE) : 0);
 
     return img;
-
 }
 
 cv::Mat real(cv::Mat img)
@@ -116,9 +110,6 @@ void normalizedLogTransform(cv::Mat& img)
     // cv::normalize(img, img, 0, 1, CV_MINMAX);
 }
 
-}
+} // namespace FFTTools
 
-}
-
-}
-
+} // namespace evt

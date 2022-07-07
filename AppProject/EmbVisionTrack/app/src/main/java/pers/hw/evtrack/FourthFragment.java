@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View.OnClickListener;
 import android.widget.*;
 
+import pers.hw.evtrack.net.Buffer;
+
 
 public class FourthFragment extends Fragment {
     private View view;
@@ -44,11 +46,11 @@ public class FourthFragment extends Fragment {
                     break;
                 case 5:
 
-                    cmdTv.setText(client.cmdResult);
+                    cmdTv.setText((String)msg.obj);
 
                     break;
                 case 20:
-                    clientCntTv.setText("当前用户数量: " + client.clientCnt);
+                    clientCntTv.setText("当前用户数量: " + msg.arg1);
                     break;
                 case 22:
                     toast.setText("发送成功");
@@ -120,8 +122,10 @@ public class FourthFragment extends Fragment {
                     toast.show();
                     return;
                 }
-
-                client.writeToServer(Command.system_cmd, cmd);
+                Buffer buf = Client.createBuffer(Command.SYSTEM_CMD);
+                buf.appendInt32(cmd.length());
+                buf.append(cmd.getBytes());
+                client.send(buf);
             }
         });
 
@@ -141,7 +145,10 @@ public class FourthFragment extends Fragment {
                     return;
                 }
 
-                client.writeToServer(Command.send_to_all_clients, msg);
+                Buffer buf = Client.createBuffer(Command.SEND_TO_ALL_CLIENTS);
+                buf.appendInt32(msg.length());
+                buf.append(msg.getBytes());
+                client.send(buf);
 
             }
 

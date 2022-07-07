@@ -1,14 +1,10 @@
-#ifndef EVT_FFT_TOOLS_HPP
-#define EVT_FFT_TOOLS_HPP
+#ifndef EVT_FFT_TOOLS_H
+#define EVT_FFT_TOOLS_H
 
-#include "opencv2/opencv.hpp"
+#include "opencv2/core.hpp"
 
-namespace EVTrack
+namespace evt
 {
-
-namespace kcf
-{
-
 
 namespace FFTTools
 {
@@ -22,12 +18,8 @@ cv::Mat complexDivision(cv::Mat a, cv::Mat b);
 void rearrange(cv::Mat& img);
 void normalizedLogTransform(cv::Mat& img);
 
+} // namespace FFTTools
 
-}
+} // namespace evt
 
-}
-
-}
-
-#endif
-
+#endif // EVT_FFT_TOOLS_H

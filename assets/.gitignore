@@ -1,3 +1,12 @@
-/build/*
-!/build/Makefile
+
+build/
+/bin/*
+!/bin/*.sh
+
+tmp/
+
+*.d
+*.dep
+*.o
+*.out
 
