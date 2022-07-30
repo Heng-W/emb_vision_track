@@ -47,13 +47,13 @@ public class Client extends TcpClient {
                 while (buf.readableBytes() >= HEADER_LEN + MIN_MESSAGE_LEN) {
                     int len = buf.peekInt32();
                     if (len > MAX_MESSAGE_LEN || len < MIN_MESSAGE_LEN) {
-                        Log.e("message", "message length invalid");
+                        Log.e("message", "message length invalid: " + len);
                         break;
                     } else if (buf.readableBytes() >= HEADER_LEN + len) {
                         buf.retrieve(HEADER_LEN);
-                        ByteArrayInputStream bis = new ByteArrayInputStream(buf.data(), 0, len);
+                        ByteArrayInputStream bis = new ByteArrayInputStream(buf.data(), buf.peek(), len);
                         try {
-                            parseMessage(conn, new DataInputStream(bis));
+                            parseMessage(new DataInputStream(bis));
                         } catch (IOException e) {
                             Log.e("IOException", e.toString());
                         }
@@ -119,7 +119,7 @@ public class Client extends TcpClient {
             handler[idx].sendMessage(msg);
         }
     }
-    
+
     private void sendToFragment(int idx, int what, Bundle bundle) {
         if (handler[idx] != null) {
             Message msg = handler[idx].obtainMessage(what);
@@ -127,7 +127,7 @@ public class Client extends TcpClient {
             handler[idx].sendMessage(msg);
         }
     }
-    
+
     private void sendToFragment(int idx, int what, Object obj) {
         if (handler[idx] != null) {
             Message msg = handler[idx].obtainMessage(what, obj);
@@ -141,24 +141,24 @@ public class Client extends TcpClient {
             handler[idx].sendMessage(msg);
         }
     }
-    
+
     private void sendToFragment(int idx, int what, int arg1, int arg2) {
         if (handler[idx] != null) {
             Message msg = handler[idx].obtainMessage(what, arg1, arg2);
             handler[idx].sendMessage(msg);
         }
     }
-    
+
     private void sendToFragment(int idx, int what, int arg1, int arg2, Object obj) {
         if (handler[idx] != null) {
             Message msg = handler[idx].obtainMessage(what, arg1, arg2, obj);
             handler[idx].sendMessage(msg);
         }
     }
-    
 
-    public static final int IMAGE_W = 320;
-    public static final int IMAGE_H = 240;
+
+    public static final int IMAGE_W = 640;
+    public static final int IMAGE_H = 480;
 
     public float angleHDefault = 90;
     public float angleVDefault = 90;
@@ -184,18 +184,13 @@ public class Client extends TcpClient {
     public String userName;
     public int userType;
 
-    /*
-    public class Rect {
-        int xpos, ypos, width, height;
-    }
-    */
 
-    private void parseMessage(TcpConnection conn, DataInputStream in) throws IOException {
+    private void parseMessage(DataInputStream in) throws IOException {
 
         Command cmd = Command.values()[in.readUnsignedShort()];
-        // Log.d("cmd", cmd.toString());
+        Log.d("command", cmd.toString());
         switch (cmd) {
-            case LOGIN:{
+            case LOGIN: {
                 final byte[] b = new byte[in.available()];
                 in.read(b);
                 mActivity.runOnUiThread(new Runnable() {
@@ -285,7 +280,6 @@ public class Client extends TcpClient {
                         sendToFragment(1, 1);
                         sendToFragment(2, 1);
                         sendToFragment(1, 24);
-                        // sendToFragment(3, 1);
                     }
                 });
                 break;
@@ -306,11 +300,6 @@ public class Client extends TcpClient {
                             leftCtlVal = in.readInt();
                             rightCtlVal = in.readInt();
 
-                            xpos = in.readInt();
-                            ypos = in.readInt();
-                            width = in.readInt();
-                            height = in.readInt();
-
                             sendToFragment(2, 22);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -328,13 +317,6 @@ public class Client extends TcpClient {
                 break;
             }
             case LOCATE: {
-                /*
-                Rect result = new Rect();
-                result.xpos = in.readInt();
-                result.ypos = in.readInt();
-                result.width = in.readInt();
-                result.height = in.readInt();
-                */
                 final int[] result = new int[4];
                 for (int i = 0; i < 4; i++) {
                     result[i] = in.readInt();
@@ -352,12 +334,22 @@ public class Client extends TcpClient {
                 break;
             }
             case START_TRACK: {
-                // trackFlag = true;
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        trackFlag = true;
+                    }
+                });
                 sendToFragment(1, 21, in.readUnsignedByte());
                 break;
             }
             case STOP_TRACK: {
-                // trackFlag = false;
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        trackFlag = false;
+                    }
+                });
                 sendToFragment(1, 21, in.readUnsignedByte());
                 break;
             }
@@ -366,22 +358,42 @@ public class Client extends TcpClient {
                 break;
             }
             case ENABLE_MULTI_SCALE: {
-                // useMultiScale = true;
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        useMultiScale = true;
+                    }
+                });
                 sendToFragment(1, 25, in.readUnsignedByte());
                 break;
             }
             case DISABLE_MULTI_SCALE: {
-                // useMultiScale = false;
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        useMultiScale = false;
+                    }
+                });
                 sendToFragment(1, 25, in.readUnsignedByte());
                 break;
             }
             case ENABLE_MOTION_AUTOCTL: {
-                // motionAutoCtlFlag = true;
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        motionAutoCtlFlag = true;
+                    }
+                });
                 sendToFragment(0, 1, in.readUnsignedByte());
                 break;
             }
             case DISABLE_MOTION_AUTOCTL: {
-                // motionAutoCtlFlag = false;
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        motionAutoCtlFlag = false;
+                    }
+                });
                 sendToFragment(0, 1, in.readUnsignedByte());
                 break;
             }
@@ -390,12 +402,16 @@ public class Client extends TcpClient {
                 break;
             }
             case ENABLE_FIELD_AUTOCTL: {
-                // fieldAutoCtlFlag = true;
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fieldAutoCtlFlag = true;
+                    }
+                });
                 sendToFragment(1, 24, in.readUnsignedByte());
                 break;
             }
             case DISABLE_FIELD_AUTOCTL: {
-                // fieldAutoCtlFlag = false;
                 final float val1 = in.readFloat();
                 final float val2 = in.readFloat();
                 final int flag = in.readUnsignedByte();
@@ -403,6 +419,7 @@ public class Client extends TcpClient {
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        fieldAutoCtlFlag = false;
                         angleH = val1;
                         angleV = val2;
                         sendToFragment(1, 24, flag);
@@ -423,13 +440,6 @@ public class Client extends TcpClient {
                 break;
             }
             case UPDATE_PID: {
-                /*
-                float[] pidParams = new float[8];
-                for (int i = 0; i < 8; i++) {
-                    pidParams[i] = in.readFloat();
-                }
-                sendToFragment(0, 20, pidParams);
-                 */
                 final byte[] b = new byte[in.available()];
                 in.read(b);
                 mActivity.runOnUiThread(new Runnable() {
@@ -465,7 +475,14 @@ public class Client extends TcpClient {
                 break;
             }
             case UPDATE_CLIENT_CNT: {
-                sendToFragment(3, 20, in.readInt());
+                final int val = in.readInt();
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        clientCnt = val;
+                        sendToFragment(3, 20);
+                    }
+                });
                 break;
             }
             case NOTICE: {
@@ -499,8 +516,4 @@ public class Client extends TcpClient {
         }
     }
 
-
 }
-
-
-

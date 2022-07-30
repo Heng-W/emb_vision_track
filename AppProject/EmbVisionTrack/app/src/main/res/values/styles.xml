@@ -13,8 +13,6 @@
 		<item name="android:textAppearanceLargePopupMenu">@style/PopMenuText</item>
 	</style>
 
-
-
     <!--popMenu的Style-->
     <style name="PopMenuStyle">
         <item name="android:popupBackground">@color/nav_bar</item><!-- popMenu的背景色-->
@@ -22,8 +20,9 @@
 
     <!--popMenu的字体颜色-->
     <style name="PopMenuText">
+		<item name="android:textSize">15sp</item>
         <item name="android:textColor">@color/stone_blue</item>
-		<item name="android:textStyle">italic|bold</item>	     
+		<item name="android:textStyle">bold</item>
 	</style>
 
     <!--popMenu分割线的颜色-->

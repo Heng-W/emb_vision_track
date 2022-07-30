@@ -17,7 +17,7 @@ public:
     Singleton& operator=(const Singleton&) = delete;
 
     template <typename... Args>
-    static T& instance(Args&&... args)
+    static T& instance(Args&& ... args)
     {
         std::call_once(onceFlag_, [&]
         {

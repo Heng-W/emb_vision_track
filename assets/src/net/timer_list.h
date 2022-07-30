@@ -24,7 +24,9 @@ public:
     int64_t addTimer(const TimerCallback& cb, Timestamp when, int64_t interval = 0);
     void removeTimer(int64_t timerId);
 
-    void handleRead();
+    void doTimerEvent();
+
+    Timestamp nextExpiration() const;
 
 private:
     using Entry = std::pair<Timestamp, Timer*>;
@@ -32,8 +34,6 @@ private:
     using ActiveTimers = std::unordered_map<int64_t, Timer*>;
 
     EventLoop* loop_;
-    const int timerfd_;
-    Channel timerfdChannel_;
 
     // timers sorted by expiration
     Timers timers_;

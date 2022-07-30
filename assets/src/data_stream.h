@@ -81,7 +81,7 @@ public:
     void readFixed64(T* value)
     {
         static_assert(sizeof(T) == 8, "should be 64 bits");
-        assert(end_ - cur_ >= sizeof(T));
+        assert(end_ - cur_ >= static_cast<int>(sizeof(T)));
         *reinterpret_cast<uint64_t*>(value) = networkToHost64(*reinterpret_cast<const uint64_t*>(cur_));
         cur_ += sizeof(T);
     }
@@ -90,7 +90,7 @@ public:
     void readFixed32(T* value)
     {
         static_assert(sizeof(T) == 4, "should be 32 bits");
-        assert(end_ - cur_ >= sizeof(T));
+        assert(end_ - cur_ >= static_cast<int>(sizeof(T)));
         *reinterpret_cast<uint32_t*>(value) = networkToHost32(*reinterpret_cast<const uint32_t*>(cur_));
         cur_ += sizeof(T);
     }
@@ -99,7 +99,7 @@ public:
     void readFixed16(T* value)
     {
         static_assert(sizeof(T) == 2, "should be 16 bits");
-        assert(end_ - cur_ >= sizeof(T));
+        assert(end_ - cur_ >= static_cast<int>(sizeof(T)));
         *reinterpret_cast<uint16_t*>(value) = networkToHost16(*reinterpret_cast<const uint16_t*>(cur_));
         cur_ += sizeof(T);
     }
@@ -108,7 +108,7 @@ public:
     void readFixed8(T* value)
     {
         static_assert(sizeof(T) == 1, "should be 8 bits");
-        assert(end_ - cur_ >= sizeof(T));
+        assert(end_ - cur_ >= static_cast<int>(sizeof(T)));
         *reinterpret_cast<uint8_t*>(value) = *cur_;
         cur_ += sizeof(T);
     }

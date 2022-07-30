@@ -48,9 +48,6 @@ public class SecondFragment extends Fragment {
 
     private ImageSurfaceView imageSurface;
 
-    private Timer timer;
-
-
 
     private Handler mHandler;
     private FragHandler fHandler = new FragHandler();
@@ -62,23 +59,18 @@ public class SecondFragment extends Fragment {
             // TODO: Implement this method
             switch (msg.what) {
                 case 0:
-
                     break;
                 case 1:
                     if (client.trackFlag) {
                         trackCtlBtn.setText("停止追踪");
                     } else {
                         trackCtlBtn.setText("开始追踪");
-
                     }
                     if (client.fieldAutoCtlFlag) {
                         panModeTv.setText("云台模式：自动");
                     } else {
                         panModeTv.setText("云台模式：手动");
-
                     }
-
-
                     break;
                 case 10:
                     //toast.setText(String.valueOf(client.image.length));
@@ -89,31 +81,23 @@ public class SecondFragment extends Fragment {
                     //toast.show();
                     cameraImage.setImageBitmap((Bitmap)msg.obj);
                     break;
-
                 case 11:
                     float x = (float)(client.xpos - client.width / 2) / Client.IMAGE_W;
                     float y = (float)(client.ypos - client.height / 2) / Client.IMAGE_H;
                     float w = (float)client.width / Client.IMAGE_W;
                     float h = (float)client.height / Client.IMAGE_H;
 
-
                     if (client.trackFlag) {
-
                         imageSurface.showResult(x, y, w, h);
                     }
-                    break;
-                case 15:
-                    client.send(Command.IMAGE);
                     break;
                 case 21:
                     if (client.trackFlag) {
                         trackCtlBtn.setText("停止追踪");
                     } else {
                         trackCtlBtn.setText("开始追踪");
-
                     }
-
-                    if (msg.arg1 == client.userID) {
+                    if (msg.arg1 == 0) {
                         toast.setText("设置成功");
                     } else {
                         if (client.trackFlag) {
@@ -134,45 +118,34 @@ public class SecondFragment extends Fragment {
                     } else {
                         angleHSet = client.angleH;
                         angleVSet = client.angleV;
-
                         panModeTv.setText("云台模式：手动");
-
                     }
 
-                    if (msg.arg1 == client.userID) {
+                    if (msg.arg1 == 0) {
                         toast.setText("设置成功");
                     } else {
                         if (client.fieldAutoCtlFlag) {
-
                             toast.setText("ID为" + msg.arg1 + "的用户设置云台为自动模式");
                         } else {
                             toast.setText("ID为" + msg.arg1 + "的用户设置云台为手动模式");
-
                         }
-
                     }
-
                     toast.show();
                     break;
-
                 case 25:
                     if (client.useMultiScale) {
                         trackModeTv.setText("追踪模式：多尺度");
                     } else {
                         trackModeTv.setText("追踪模式：单尺度");
-
                     }
-                    if (msg.arg1 == client.userID) {
+                    if (msg.arg1 == 0) {
                         toast.setText("设置成功");
                     } else {
                         if (client.useMultiScale) {
-
                             toast.setText("ID为" + msg.arg1 + "的用户开启了多尺度追踪");
                         } else {
                             toast.setText("ID为" + msg.arg1 + "的用户关闭了多尺度追踪");
-
                         }
-
                     }
                     toast.show();
                     break;
@@ -186,14 +159,12 @@ public class SecondFragment extends Fragment {
 
 
     public static SecondFragment newInstance() {
-
         return new SecondFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         view = inflater.inflate(R.layout.tab_second, container, false);
         return view;
     }
@@ -210,13 +181,10 @@ public class SecondFragment extends Fragment {
 
         toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         initView();
-
-
     }
 
 
     private void initView() {
-
         angleHSet = client.angleH;
         angleVSet = client.angleV;
 
@@ -230,7 +198,6 @@ public class SecondFragment extends Fragment {
             }
         });
 
-
         trackModeTv = view.findViewById(R.id.track_mode_tv);
 
         trackCtlBtn = view.findViewById(R.id.track_ctl_btn);
@@ -238,14 +205,12 @@ public class SecondFragment extends Fragment {
             trackCtlBtn.setText("停止追踪");
         } else {
             trackCtlBtn.setText("开始追踪");
-
         }
 
         if (client.useMultiScale) {
             trackModeTv.setText("追踪模式：多尺度");
         } else {
             trackModeTv.setText("追踪模式：单尺度");
-
         }
 
         trackCtlBtn.setOnClickListener(new OnClickListener() {
@@ -261,7 +226,6 @@ public class SecondFragment extends Fragment {
                     client.send(Command.STOP_TRACK);
                 } else {
                     client.send(Command.START_TRACK);
-
                 }
 
             }
@@ -281,7 +245,6 @@ public class SecondFragment extends Fragment {
                     if (imageSurface.isDrawEnabled()) {
                         imageSurface.disableDraw();
                         setTargetBtn.setText("选择目标");
-
                     } else {
                         imageSurface.enableDraw();
                         setTargetBtn.setText("取消选择");
@@ -304,10 +267,10 @@ public class SecondFragment extends Fragment {
                 }
 
                 Buffer buf = Client.createBuffer(Command.SET_TARGET);
-                buf.appendInt16((int)(x * Client.IMAGE_W));
-                buf.appendInt16((int)(y * Client.IMAGE_H));
-                buf.appendInt16((int)(w * Client.IMAGE_W));
-                buf.appendInt16((int)(h * Client.IMAGE_H));
+                buf.appendInt32((int)((x + w / 2) * Client.IMAGE_W));
+                buf.appendInt32((int)((y + h / 2) * Client.IMAGE_H));
+                buf.appendInt32((int)(w * Client.IMAGE_W));
+                buf.appendInt32((int)(h * Client.IMAGE_H));
                 client.send(buf);
                 imageSurface.disableDraw();
 
@@ -322,7 +285,6 @@ public class SecondFragment extends Fragment {
             panModeTv.setText("云台模式：自动");
         } else {
             panModeTv.setText("云台模式：手动");
-
         }
 
         panModeBtn = view.findViewById(R.id.pan_mode_btn);
@@ -340,9 +302,7 @@ public class SecondFragment extends Fragment {
                     client.send(Command.DISABLE_FIELD_AUTOCTL);
                 } else {
                     client.send(Command.ENABLE_FIELD_AUTOCTL);
-
                 }
-
             }
         });
 
@@ -366,15 +326,12 @@ public class SecondFragment extends Fragment {
                         break;
                     case 1:
                         angleHSet -= 5;
-
                         break;
                     case 2:
                         angleVSet += 5;
-
                         break;
                     case 3:
                         angleHSet += 5;
-
                         break;
                     default:
                         break;
@@ -392,75 +349,6 @@ public class SecondFragment extends Fragment {
             }
         });
 
-
     }
-
-
-    @Override
-    public void onStart() {
-        // TODO: Implement this method
-        super.onStart();
-
-        startTimer();
-    }
-
-    @Override
-    public void onStop() {
-        // TODO: Implement this method
-        super.onStop();
-
-        stopTimer();
-    }
-
-
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        // TODO: Implement this method
-        super.onHiddenChanged(hidden);
-        if (hidden) {
-            stopTimer();
-        } else {
-            startTimer();
-
-        }
-    }
-
-    private void startTimer() {
-        if (timer == null) {
-            timer = new Timer();
-            timer.start();
-        }
-
-    }
-
-
-    private void stopTimer() {
-        if (timer != null) {
-            if (timer.isAlive()) {
-                timer.interrupt();
-            }
-            timer = null;
-        }
-    }
-
-
-    private class Timer extends Thread {
-
-        @Override
-        public void run() {
-            while (client.connection() != null) {
-                try {
-                    Message msg = new Message();
-                    msg.what = 15;
-                    fHandler.sendMessage(msg);
-                    Thread.sleep(80);
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
-        }
-    }
-
 
 }

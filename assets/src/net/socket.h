@@ -29,7 +29,7 @@ int read(int sockfd, void* buf, int len);
 int write(int sockfd, const void* buf, int len);
 void close(int sockfd);
 
-int recvByUdp(int sockfd, void* buf, int len, const InetAddress& addr);
+int recvByUdp(int sockfd, void* buf, int len, InetAddress* peerAddr);
 int sendByUdp(int sockfd, const void* buf, int len, const InetAddress& addr);
 
 void shutdownWrite(int sockfd);

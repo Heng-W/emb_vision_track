@@ -34,7 +34,7 @@ class VisionEventLoop
 public:
     using Functor = std::function<void()>;
     using SendImageCallback = std::function<void(const std::vector<uint8_t>&)>;
-    // using SendLocationCallback = std::function<void(const Rect&)>;
+    using SendTrackResultCallback = std::function<void(const Rect&)>;
 
     VisionEventLoop();
     ~VisionEventLoop();
@@ -64,6 +64,8 @@ public:
 
     void setSendImageCallback(const SendImageCallback& cb) { sendImageCallback_ = cb; }
 
+    void setTrackResultCallback(const SendTrackResultCallback& cb) { sendTrackResultCallback_ = cb; }
+
     void enableTrack(bool enable) { enableTrack_ = enable; }
     bool trackEnabled() const { return enableTrack_; }
 
@@ -78,11 +80,7 @@ public:
         resetTracker_ = true;
     }
 
-    Rect trackResult() const
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        return trackResult_;
-    }
+    Rect trackResult() const { return trackResult_; }
 
     int imageWidth() const { return imageWidth_; }
     int imageHeight() const { return imageHeight_; }
@@ -97,9 +95,9 @@ private:
     Rect trackResult_;
     std::vector<Functor> pendingFunctors_;
     SendImageCallback sendImageCallback_;
+    SendTrackResultCallback sendTrackResultCallback_;
 
     bool enableTrack_;
-    bool initTracker_;
     bool resetTracker_;
     bool enableMultiScale_;
     std::atomic<bool> quit_;

@@ -46,7 +46,8 @@ public:
             queueInLoop(std::forward<Fn>(fn), std::forward<Args>(args)...);
         }
     }
-    
+
+    // 成员函数指针特化
     template <class Tp, class Res, class Class, class... Args>
     void runInLoop(Res(Class::*pmf)(Args...), Tp&& object, Args&& ... args)
     {
@@ -59,7 +60,7 @@ public:
             queueInLoop(pmf, std::forward<Tp>(object), std::forward<Args>(args)...);
         }
     }
-    
+
     template <class Res, class Class, class... Args>
     void runInLoop(Res(Class::*pmf)(Args...), Class* object, Args&& ... args)
     {
@@ -98,7 +99,7 @@ public:
     int64_t addTimer(const TimerCallback& cb, int64_t delayMs, int64_t periodMs = 0);
     void removeTimer(int64_t timerId);
 
-    void assertInLoopThread()
+    void assertInLoopThread() const
     {
 #ifndef NDEBUG
         if (!isInLoopThread()) abortNotInLoopThread();
@@ -120,7 +121,7 @@ public:
 private:
     friend class Channel;
 
-    void abortNotInLoopThread();
+    void abortNotInLoopThread() const;
     void wakeup();
     void handleRead(); // wake up
     void doPendingFunctors();

@@ -25,11 +25,8 @@ public class FourthFragment extends Fragment {
     private EditText cmdEdit;
 
     private Button cmdBtn;
-
     private TextView clientCntTv;
-
     private EditText msgEdit;
-
 
     private Handler mHandler;
     private FragHandler fHandler = new FragHandler();
@@ -42,20 +39,16 @@ public class FourthFragment extends Fragment {
             // TODO: Implement this method
             switch (msg.what) {
                 case 1:
-
                     break;
                 case 5:
-
                     cmdTv.setText((String)msg.obj);
-
                     break;
                 case 20:
-                    clientCntTv.setText("当前用户数量: " + msg.arg1);
+                    clientCntTv.setText("当前用户数量: " + client.clientCnt);
                     break;
                 case 22:
                     toast.setText("发送成功");
                     toast.show();
-
                     break;
                 default:
                     break;
@@ -66,7 +59,6 @@ public class FourthFragment extends Fragment {
     }
 
     public static FourthFragment newInstance() {
-
         return new FourthFragment();
     }
 
@@ -74,7 +66,6 @@ public class FourthFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         view = inflater.inflate(R.layout.tab_fourth, container, false);
         return view;
     }
@@ -89,12 +80,9 @@ public class FourthFragment extends Fragment {
         mHandler = mActivity.getHandler();
         toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         initView();
-
-
     }
 
     private void initView() {
-
         clientCntTv = view.findViewById(R.id.client_cnt);
         clientCntTv.setText("当前用户数量: " + client.clientCnt);
 
@@ -102,9 +90,7 @@ public class FourthFragment extends Fragment {
         loginUserIdTv.setText("用户ID: " + client.userID);
 
         TextView userName = view.findViewById(R.id.login_user_name);
-
         userName.setText("用户名: " + client.userName);
-
 
         cmdEdit = view.findViewById(R.id.cmd_edit);
         cmdBtn = view.findViewById(R.id.cmd_btn);
@@ -117,7 +103,7 @@ public class FourthFragment extends Fragment {
                     return;
                 }
                 String cmd = cmdEdit.getText().toString();
-                if (cmd == null || cmd.equals("")) {
+                if (cmd.equals("")) {
                     toast.setText("消息不能为空");
                     toast.show();
                     return;
@@ -130,7 +116,6 @@ public class FourthFragment extends Fragment {
         });
 
         cmdTv = view.findViewById(R.id.cmd_result_tv);
-
         msgEdit = view.findViewById(R.id.client_msg_edit);
         Button sendMsgBtn = view.findViewById(R.id.send_msg_btn);
 
@@ -138,18 +123,15 @@ public class FourthFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String msg = msgEdit.getText().toString();
-                if (msg == null || msg.equals("")) {
+                if (msg.equals("")) {
                     toast.setText("消息不能为空");
                     toast.show();
-
                     return;
                 }
-
                 Buffer buf = Client.createBuffer(Command.SEND_TO_ALL_CLIENTS);
                 buf.appendInt32(msg.length());
                 buf.append(msg.getBytes());
                 client.send(buf);
-
             }
 
         });

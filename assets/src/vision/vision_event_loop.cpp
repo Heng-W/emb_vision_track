@@ -7,6 +7,8 @@
 #include "opencv2/imgcodecs/legacy/constants_c.h"
 // #include "opencv2/videoio/legacy/constants_c.h"
 
+#include "../util/logger.h"
+#include "../util/timestamp.h"
 #include "video_device.h"
 #include "yuyv2bgr.h"
 #include "kcf_tracker/kcf_tracker.h"
@@ -25,7 +27,6 @@ static std::unique_ptr<cv::Mat> imageBuf_;
 VisionEventLoop::VisionEventLoop()
     : trackResult_{0, 0, 0, 0},
       enableTrack_(false),
-      initTracker_(true),
       resetTracker_(false),
       enableMultiScale_(false),
       quit_(false),
@@ -41,11 +42,11 @@ bool VisionEventLoop::openDevice(const char* deviceName)
 {
     device_.reset(new VideoDevice(deviceName));
     if (!device_->isOpened()) return false;
-    
+
     Size imageSize = device_->imageSize();
     imageWidth_ = imageSize.width;
     imageHeight_ = imageSize.height;
-    
+
     device_->setFetchFrameCallback([this](char* data, int width, int height, ImageType type)
     {
         if (type == ImageType::YUYV)
@@ -85,12 +86,15 @@ void VisionEventLoop::loop()
         }
         for (const Functor& functor : functors) functor();
         if (!img) continue;
-        
+
         std::vector<uint8_t> dataEncode;
         cv::imencode(".jpg", *img, dataEncode, qualityOption); // 将图像编码
         if (sendImageCallback_) sendImageCallback_(dataEncode);
-        
+
+        auto start = util::Timestamp::now();
         track(*img);
+        LOG(DEBUG) << "track time: " << (util::Timestamp::now() - start).toMsec() << " ms";
+        if (enableTrack_ && sendTrackResultCallback_) sendTrackResultCallback_(trackResult_);
     }
 }
 
@@ -107,18 +111,13 @@ void VisionEventLoop::track(const cv::Mat& frame)
     grayImage.convertTo(grayImage, CV_32F, 1 / 255.f);
     grayImage -= 0.5f;
 
-    if (initTracker_)
-    {
-        initTracker_ = false;
-        int xstart = trackResult_.xpos - trackResult_.width / 2;
-        int ystart = trackResult_.ypos - trackResult_.height / 2;
-        tracker_->init(cv::Rect(xstart, ystart, trackResult_.width, trackResult_.height), grayImage);
-    }
-    else if (resetTracker_)
+    if (resetTracker_)
     {
         resetTracker_ = false;
         int xstart = trackResult_.xpos - trackResult_.width / 2;
         int ystart = trackResult_.ypos - trackResult_.height / 2;
+        LOG(INFO) << "pos: " << trackResult_.xpos << "," << trackResult_.ypos << " "
+                  << "size: " << trackResult_.width << "," << trackResult_.height;
         tracker_->reset(cv::Rect(xstart, ystart, trackResult_.width, trackResult_.height), grayImage);
     }
     else if (enableTrack_)
@@ -126,7 +125,7 @@ void VisionEventLoop::track(const cv::Mat& frame)
         cv::Rect result = tracker_->update(grayImage);
         int xcenter = result.x + result.width / 2;
         int ycenter = result.y + result.height / 2;
-        
+
         trackResult_ = {xcenter, ycenter, result.width, result.height};
     }
 

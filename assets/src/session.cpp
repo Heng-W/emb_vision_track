@@ -24,10 +24,12 @@ const int kMaxMessageLen = 64 * 1024 * 1024;
 
 
 Session::Session(Server* server, const TcpConnectionPtr& conn)
-    : conn_(conn),
+    : server_(server),
+      conn_(conn),
       broadcastService_(server->broadcastService()),
       login_(false),
-      userId_(65535)
+      userId_(65535),
+      type_(2)
 {
     conn->setMessageCallback([this](const net::TcpConnectionPtr & conn,
                                     net::Buffer * buf,
@@ -56,29 +58,18 @@ Session::Session(Server* server, const TcpConnectionPtr& conn)
 }
 
 
-Session::~Session()
-{
-    if (login_)
-    {
-        server_->removeUser(userId_);
-    }
-}
+Session::~Session() = default;
 
-inline Buffer createBuffer(Command cmd, int initialSize = 0)
+Buffer Session::createBuffer(Command cmd, int initialSize)
 {
     Buffer buf(kHeaderLen + kMinMessageLen + initialSize, kHeaderLen);
     buf.appendUInt16(static_cast<uint16_t>(cmd));
     return buf;
 }
 
-inline void packBuffer(Buffer* buf)
+void Session::packBuffer(Buffer* buf)
 {
     buf->prependUInt32(buf->readableBytes());
-}
-
-int checkForLogin(const std::string& userName, const std::string& pwd, uint32_t* userId)
-{
-    return 0;
 }
 
 void Session::logout()
@@ -108,7 +99,11 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
         }
         std::string userName = in.readString();
         std::string pwd = in.readString();
-        int errorCode = checkAccountByUserName(userName, pwd, &userId_, &type_);
+        int errorCode = 0;
+        if (userName != "guest")
+        {
+            errorCode = checkAccountByUserName(userName, pwd, &userId_, &type_);
+        }
 
         Buffer buf = createBuffer(cmd);
         buf.appendUInt32(errorCode);
@@ -131,6 +126,7 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
         }
         server_->addUser(userId_, shared_from_this());
         login_ = true;
+        return;
     }
 
     static auto& vision = Singleton<VisionEventLoop>::instance();
@@ -238,12 +234,6 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
                 out.writeFixed32(motionControl.leftCtlVal());
                 out.writeFixed32(motionControl.rightCtlVal());
 
-                Rect result = vision.trackResult(); // thread safe
-                out.writeFixed32(result.xpos);
-                out.writeFixed32(result.ypos);
-                out.writeFixed32(result.width);
-                out.writeFixed32(result.height);
-
                 buf.hasWritten(out.size());
                 packBuffer(&buf);
                 conn->send(std::move(buf));
@@ -251,17 +241,6 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
             break;
         }
         case Command::IMAGE:
-            vision.queueInLoop([this]()
-            {
-                vision.setSendImageCallback([this](const std::vector<uint8_t>& image)
-                {
-                    Buffer buf = createBuffer(Command::IMAGE, sizeof(uint32_t) + image.size());
-                    buf.appendUInt32(image.size());
-                    buf.append(image.data(), image.size());
-                    packBuffer(&buf);
-                    broadcastService_->broadcast(std::move(buf));
-                });
-            });
             break;
         case Command::START_TRACK:
         {
@@ -638,13 +617,16 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
         case Command::SYSTEM_CMD:
         {
             std::string sysCmd = in.readString();
-            std::string res = util::system(sysCmd);
+            if (userId_ == 0)
+            {
+                std::string res = util::system(sysCmd);
 
-            Buffer buf = createBuffer(cmd);
-            buf.appendUInt32(res.size());
-            buf.append(res.data(), res.size());
-            packBuffer(&buf);
-            conn->send(std::move(buf));
+                Buffer buf = createBuffer(cmd);
+                buf.appendUInt32(res.size());
+                buf.append(res.data(), res.size());
+                packBuffer(&buf);
+                conn->send(std::move(buf));
+            }
             break;
         }
         case Command::UPDATE_CLIENT_CNT:
@@ -660,10 +642,16 @@ void Session::parseMessage(const net::TcpConnectionPtr& conn, const char* data, 
             break;
         }
         case Command::HALT:
-            // util::system("halt");
+            if (userId_ == 0)
+            {
+                util::system("halt");
+            }
             break;
         case Command::REBOOT:
-            // util::system("reboot");
+            if (userId_ == 0)
+            {
+                util::system("reboot");
+            }
             break;
         default:
             break;

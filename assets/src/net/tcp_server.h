@@ -16,8 +16,8 @@ class EventLoopThreadPool;
 class TcpServer
 {
 public:
-    using ThreadInitCallback = std::function<void(EventLoop*)>;
     using ConnectionMap = std::unordered_map<int64_t, TcpConnectionPtr>;
+    using ThreadInitCallback = std::function<void(EventLoop*)>;
 
     enum Option { kNoReusePort, kReusePort };
 
@@ -66,7 +66,7 @@ public:
     const std::string& name() const { return name_; }
 
     // not thread safe, should use it in baseLoop
-    const ConnectionMap& connections() const { return connections_; }
+    const ConnectionMap& connections() const;
 
 private:
 

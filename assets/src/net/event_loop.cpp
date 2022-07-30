@@ -18,7 +18,7 @@ namespace
 using ChannelList = Poller::ChannelList;
 
 thread_local net::EventLoop* t_loopInThisThread = nullptr;
-constexpr int kPollTimeMs = 10000;
+constexpr int kMaxPollTimeMs = 10000;
 
 int createEventfd()
 {
@@ -90,10 +90,19 @@ void EventLoop::loop()
     while (!quit_)
     {
         activeChannels.clear();
-        pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels);
+        int64_t pollTimeMs = kMaxPollTimeMs;
+        Timestamp nextExpiration = timerList_->nextExpiration();
+        if (nextExpiration.valid())
+        {
+            pollTimeMs = (nextExpiration - Timestamp::now()).toMsec();
+            if (pollTimeMs < 0) pollTimeMs = 0;
+            else if (pollTimeMs > kMaxPollTimeMs) pollTimeMs = kMaxPollTimeMs;
+        }
+        pollReturnTime_ = poller_->poll(static_cast<int>(pollTimeMs), &activeChannels);
         ++iteration_;
         if (LOG_IS_ON(TRACE)) printChannels(activeChannels);
 
+        timerList_->doTimerEvent();
         for (Channel* channel : activeChannels)
         {
             channel->handleEvent(pollReturnTime_);
@@ -134,7 +143,7 @@ void EventLoop::removeTimer(int64_t timerId)
     return timerList_->removeTimer(timerId);
 }
 
-void EventLoop::abortNotInLoopThread()
+void EventLoop::abortNotInLoopThread() const
 {
     LOG(FATAL) << "EventLoop::abortNotInLoopThread - EventLoop " << this
                << " was created in threadId_ = " << threadId_

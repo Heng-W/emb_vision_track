@@ -10,7 +10,7 @@ namespace net
 {
 
 BroadcastService::BroadcastService(TcpServer* server)
-    :server_(server),
+    : server_(server),
       loop_(server->getLoop())
 {
 }

@@ -36,9 +36,9 @@ public class ThirdFragment extends Fragment {
 
     private LineChart chart;
     private DynamicLineChart dynamicLineChart;
-    private List<Integer> lineDataList = new ArrayList<>(); //数据集合
-    private List<String> lineNames = new ArrayList<>(); //折线名字集合
-    private List<Integer> lineColor = new ArrayList<>();//折线颜色集合
+    private List<Integer> lineDataList = new ArrayList<>(); // 数据集合
+    private List<String> lineNames = new ArrayList<>(); // 折线名字集合
+    private List<Integer> lineColor = new ArrayList<>(); // 折线颜色集合
 
 
     private Handler mHandler;
@@ -74,9 +74,7 @@ public class ThirdFragment extends Fragment {
                         yposTv.setText("y坐标:" + client.ypos);
                         widthTv.setText("宽度:" + client.width);
                         heightTv.setText("高度:" + client.height);
-
                     }
-
                     break;
                 default:
                     break;
@@ -87,7 +85,6 @@ public class ThirdFragment extends Fragment {
     }
 
     public static ThirdFragment newInstance() {
-
         return new ThirdFragment();
     }
 
@@ -95,7 +92,6 @@ public class ThirdFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         view = inflater.inflate(R.layout.tab_third, container, false);
         return view;
     }
@@ -110,11 +106,9 @@ public class ThirdFragment extends Fragment {
         mHandler = mActivity.getHandler();
         toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         initView();
-
     }
 
     private void initView() {
-
         chart = view.findViewById(R.id.lineChart);
 
         lineNames.add("水平角偏移");
@@ -123,39 +117,28 @@ public class ThirdFragment extends Fragment {
         lineNames.add("目标x轴偏移");
         lineNames.add("目标y轴偏移");
 
-
         lineColor.add(Color.RED);
         lineColor.add(Color.parseColor("#ff7f00"));
-
         lineColor.add(Color.parseColor("#238e23"));
         lineColor.add(Color.parseColor("#3299cc"));
 
-
         dynamicLineChart = new DynamicLineChart(chart, lineNames, lineColor);
-
         dynamicLineChart.setYAxis(50, -50, 10);
-
         dynamicLineChart.setDescription("时间");
 
         anglehTv = view.findViewById(R.id.angleh_tv);
         anglevTv = view.findViewById(R.id.anglev_tv);
 
         leftValTv = view.findViewById(R.id.left_val_tv);
-
         rightValTv = view.findViewById(R.id.right_val_tv);
 
-
         trackTv =  view.findViewById(R.id.track_tv);
-
         trackLinear =  view.findViewById(R.id.track_linear);
 
         xposTv = view.findViewById(R.id.xpos_tv);
         yposTv = view.findViewById(R.id.ypos_tv);
-
         widthTv = view.findViewById(R.id.width_tv);
         heightTv = view.findViewById(R.id.height_tv);
-
-
     }
 
     private void addLineData() {
@@ -172,7 +155,6 @@ public class ThirdFragment extends Fragment {
     public void onStart() {
         // TODO: Implement this method
         super.onStart();
-
         startTimer();
     }
 
@@ -180,13 +162,10 @@ public class ThirdFragment extends Fragment {
     public void onStop() {
         // TODO: Implement this method
         super.onStop();
-
         stopTimer();
     }
 
-
     private class Timer extends Thread {
-
         @Override
         public void run() {
             while (client.connection() != null) {
@@ -202,7 +181,6 @@ public class ThirdFragment extends Fragment {
         }
     }
 
-
     @Override
     public void onHiddenChanged(boolean hidden) {
         // TODO: Implement this method
@@ -211,10 +189,8 @@ public class ThirdFragment extends Fragment {
             stopTimer();
         } else {
             startTimer();
-
         }
     }
-
 
     private float getAnglehOfs() {
         return client.angleHDefault - client.angleH;
@@ -238,7 +214,6 @@ public class ThirdFragment extends Fragment {
             timer = new Timer();
             timer.start();
         }
-
     }
 
     private void stopTimer() {

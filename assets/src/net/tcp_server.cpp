@@ -50,6 +50,12 @@ void TcpServer::setThreadNum(int numThreads)
     threadPool_->setThreadNum(numThreads);
 }
 
+auto TcpServer::connections() const -> const ConnectionMap&
+{
+    loop_->assertInLoopThread();
+    return connections_;
+}
+
 void TcpServer::start()
 {
     if (started_.fetch_add(1) == 0)

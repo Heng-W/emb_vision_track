@@ -80,6 +80,9 @@ public:
     size_t prependableBytes() const { return readerIndex_; }
 
     const char* peek() const { return begin() + readerIndex_; }
+    const char* beginRead() const { return begin() + readerIndex_; }
+    char* beginRead() { return begin() + readerIndex_; }
+
     const char* beginWrite() const { return begin() + writerIndex_; }
     char* beginWrite() { return begin() + writerIndex_; }
 

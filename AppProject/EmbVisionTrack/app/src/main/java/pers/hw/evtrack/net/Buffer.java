@@ -38,6 +38,10 @@ public class Buffer {
         return readerIndex;
     }
 
+    public byte[] data() {
+        return buf;
+    }
+
     public int peek() {
         return readerIndex;
     }
@@ -51,12 +55,12 @@ public class Buffer {
     }
 
     public void unwrite(int len) {
-        assert len <= readableBytes();
+        assert (len <= readableBytes());
         writerIndex -= len;
     }
 
     public void retrieve(int len) {
-        assert(len <= readableBytes());
+        assert (len <= readableBytes());
         if (len < readableBytes()) {
             readerIndex += len;
         } else {
@@ -66,10 +70,6 @@ public class Buffer {
 
     public void retrieveAll() {
         readerIndex = writerIndex = prependSize;
-    }
-
-    public byte[] data() {
-        return buf;
     }
 
     public void append(byte[] data) {
@@ -102,8 +102,8 @@ public class Buffer {
     }
 
     public void appendInt64(long num) {
-        appendInt32((int) (num >>> 32));
-        appendInt32((int) (num));
+        appendInt32((int) ((num >>> 32) & 0xffffffffL));
+        appendInt32((int) (num & 0xffffffffL));
     }
 
     public void appendFloat(float val) {
@@ -119,23 +119,22 @@ public class Buffer {
     }
 
     public int peekInt16() {
-        return buf[readerIndex] << 8 | buf[readerIndex + 1];
+        return (buf[readerIndex] & 0xff) << 8 | (buf[readerIndex + 1] & 0xff);
     }
 
     public int peekInt32() {
         int res = 0;
-        res |= buf[readerIndex] << 24;
-        res |= buf[readerIndex + 1] << 16;
-        res |= buf[readerIndex + 2] << 8;
-        res |= buf[readerIndex + 3];
+        res |= (buf[readerIndex] & 0xff) << 24;
+        res |= (buf[readerIndex + 1] & 0xff) << 16;
+        res |= (buf[readerIndex + 2] & 0xff) << 8;
+        res |= buf[readerIndex + 3] & 0xff;
         return res;
     }
 
     public long peekInt64() {
         long res = 0;
-        int size = 8;
-        for (int i = 0; i < size; ++i) {
-            res |= buf[readerIndex + i] << (8 * (size - 1 - i));
+        for (int i = 0; i < 8; ++i) {
+            res |= (buf[readerIndex + i] & 0xffL) << (8 * (7 - i));
         }
         return res;
     }
@@ -146,28 +145,30 @@ public class Buffer {
 
     public int readInt16() {
         int res = 0;
-        res |= buf[readerIndex++] << 8;
-        res |= buf[readerIndex++];
+        res |= (buf[readerIndex++] & 0xff) << 8;
+        res |= buf[readerIndex++] & 0xff;
         return res;
     }
 
     public int readInt32() {
         int res = 0;
-        res |= buf[readerIndex++] << 24;
-        res |= buf[readerIndex++] << 16;
-        res |= buf[readerIndex++] << 8;
-        res |= buf[readerIndex++];
+        res |= (buf[readerIndex++] & 0xff) << 24;
+        res |= (buf[readerIndex++] & 0xff) << 16;
+        res |= (buf[readerIndex++] & 0xff) << 8;
+        res |= buf[readerIndex++] & 0xff;
         return res;
     }
 
     public long readInt64() {
-        long res = (long) readInt32() << 32;
-        res |= readInt32();
+        long res = 0;
+        for (int i = 0; i < 8; ++i) {
+            res |= (buf[readerIndex++] & 0xffL) << (8 * (7 - i));
+        }
         return res;
     }
 
     public void prepend(byte[] data, int off, int len) {
-        assert(len <= prependableBytes());
+        assert (len <= prependableBytes());
         readerIndex -= len;
         System.arraycopy(data, off, this.buf, readerIndex, len);
     }
@@ -192,15 +193,15 @@ public class Buffer {
     }
 
     public void prependInt64(long num) {
-        prependInt32((int) (num));
-        prependInt32((int) (num >>> 32));
+        prependInt32((int) (num & 0xffffffffL));
+        prependInt32((int) ((num >>> 32) & 0xffffffffL));
     }
 
     public void ensureWritableBytes(int len) {
         if (writableBytes() < len) {
             makeSpace(len);
         }
-        assert(writableBytes() >= len);
+        assert (writableBytes() >= len);
     }
 
     private void makeSpace(int len) {

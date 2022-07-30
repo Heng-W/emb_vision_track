@@ -171,7 +171,7 @@ int recvByUdp(int sockfd, void* buf, int len, InetAddress* peerAddr)
     memset(&addr, 0, sizeof(addr));
     socklen_t addrlen = static_cast<socklen_t>(sizeof(addr));
     int n = ::recvfrom(sockfd, buf, len, 0, sockaddr_cast(&addr), &addrlen);
-    peerAddr->setSockAddr(addr);
+    if (peerAddr) peerAddr->setSockAddr(addr);
     return n;
 }
 

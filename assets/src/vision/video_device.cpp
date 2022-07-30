@@ -49,6 +49,8 @@ VideoDevice::VideoDevice(const char* deviceName, int bufferCnt, float fps, bool 
     {
         setFormat();
         imageSize_ = querySize();
+        LOG(INFO) << "image width: " << imageSize_.width << ", "
+                  << "image height: " << imageSize_.height;
     }
 }
 

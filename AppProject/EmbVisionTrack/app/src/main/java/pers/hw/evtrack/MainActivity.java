@@ -46,17 +46,17 @@ public class MainActivity extends FragmentActivity {
     private int fragIndex = FRAG_MAX;
 
     private PopupMenu popupMenu;
-    //private MenuItem tstItem;
     private MainHandler mHandler = new MainHandler();
 
-
-    private final InetSocketAddress DEFAULT_SERVER_ADDR = new InetSocketAddress("127.0.0.1",12);
+    private final InetSocketAddress DEFAULT_SERVER_ADDR = new InetSocketAddress("192.168.5.1",18825);
 
     private InetSocketAddress serverAddr = DEFAULT_SERVER_ADDR;
 
     private int userType;
     private String userName;
     private String password;
+    private Timer timer;
+
 
     private class MainHandler extends Handler {
 
@@ -65,19 +65,16 @@ public class MainActivity extends FragmentActivity {
             // TODO: Implement this method
             switch (msg.what) {
                 case 0:
-
                     refreshConnectView();
                     toast.setText("连接已关闭");
                     toast.show();
                     break;
                 case 1:
-
                     refreshConnectView();
                     toast.setText("连接中断");
                     toast.show();
                     break;
                 case 2:
-
                     refreshConnectView();
                     toast.setText("处理异常");
                     toast.show();
@@ -93,17 +90,12 @@ public class MainActivity extends FragmentActivity {
                     clearDim();
                     DialogUtils.closeDialog(loadDialog);
                     if (client.connection() != null) {
-
                         toast.setText("连接成功");
                         toast.show();
-
                         initMainView();
-
                     } else {
                         toast.setText("连接失败");
                         toast.show();
-
-
                         getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.white));
                         getWindow().setStatusBarColor(getResources().getColor(R.color.primary));
                         getWindow().setNavigationBarColor(getResources().getColor(R.color.nav_bar));
@@ -121,8 +113,8 @@ public class MainActivity extends FragmentActivity {
                         setSelect(0);
                     }
                     break;
-
                 case 12:
+                    timer.cancel();
                     clearDim();
                     DialogUtils.closeDialog(loadDialog);
                     switch (msg.arg1) {
@@ -158,12 +150,8 @@ public class MainActivity extends FragmentActivity {
                             break;
                         default:
                             break;
-
-
                     }
                     break;
-
-
                 case 21:
                     toast.setText("摄像头复位成功");
                     toast.show();
@@ -173,34 +161,25 @@ public class MainActivity extends FragmentActivity {
                         toast.setText("状态复位成功");
                     } else {
                         toast.setText("ID为" + msg.arg1 + "的用户复位了状态");
-
                     }
                     toast.show();
                     break;
-
                 case 50:
                     // toast.setText(client.noticeMsg);
-                    //toast.show();
+                    // toast.show();
                     initNoticeDialog("消息", (String)msg.obj);
                     break;
-
-
                 case 80:
                     toast.setText("image");
                     toast.show();
-
                     break;
-
                 case 88:
-
                     setSelect(0);
                     break;
                 case 100:
                     toast.setText("用户权限不足");
                     toast.show();
                     break;
-
-
                 default:
                     break;
             }
@@ -220,22 +199,16 @@ public class MainActivity extends FragmentActivity {
             new StrictMode.ThreadPolicy.Builder().detectDiskReads().detectDiskWrites().detectNetwork().penaltyLog().build());
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectLeakedSqlLiteObjects().penaltyLog().penaltyDeath().build());
 
-        //requestPermission();
-
+        // requestPermission();
         toast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
-
         fc = new FragmentComponent[FRAG_MAX];
-
         initConnectView();
-
     }
-
 
 
     public Client getClient() {
         return this.client;
     }
-
 
     public Handler getHandler() {
         return this.mHandler;
@@ -280,8 +253,6 @@ public class MainActivity extends FragmentActivity {
         overlay.clear();
     }
 
-
-
     private void refreshConnectView() {
         userType = 0;
 
@@ -289,16 +260,13 @@ public class MainActivity extends FragmentActivity {
         for (int i = 0; i < FRAG_MAX; i++) {
             fc[i].release();
         }
-
         getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.window_bg));
         getWindow().setStatusBarColor(getResources().getColor(R.color.window_bg));
         getWindow().setNavigationBarColor(getResources().getColor(R.color.window_bg));
         titleTv.setText(getResources().getString(R.string.app_name));
 
         setContentView(R.layout.connect);
-
         initConnectView();
-
     }
 
     private void initMainView() {
@@ -318,34 +286,31 @@ public class MainActivity extends FragmentActivity {
 
         });
         initFragmentComponent();
-
-        //client.sendCmd(Command.init);
-        //setSelect(0);
     }
 
     private void initPopupMenu(View v) {
         popupMenu = new PopupMenu(this, v);
         getMenuInflater().inflate(R.menu.main, popupMenu.getMenu());
-        //tstItem = popupMenu.getMenu().findItem(R.id.action_tst);
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.action_exit:
+                    case R.id.action_exit: {
                         TcpConnection conn = client.connection();
                         if (conn != null) {
                             conn.shutdown();
                         }
+                        Message msg = mHandler.obtainMessage(0);
+                        mHandler.sendMessage(msg);
                         break;
+                    }
                     case R.id.action_reset: {
                         if (userType != 0) {
-                            Message msg = new Message();
-                            msg.what = 100;
+                            Message msg = mHandler.obtainMessage(100);
                             mHandler.sendMessage(msg);
                             return true;
                         }
-
                         Buffer buf = Client.createBuffer(Command.RESET);
                         buf.appendInt32(0x7);
                         client.send(buf);
@@ -353,8 +318,7 @@ public class MainActivity extends FragmentActivity {
                     }
                     case R.id.action_camera_reset: {
                         if (userType != 0) {
-                            Message msg = new Message();
-                            msg.what = 100;
+                            Message msg = mHandler.obtainMessage(100);
                             mHandler.sendMessage(msg);
                             return true;
                         }
@@ -363,7 +327,6 @@ public class MainActivity extends FragmentActivity {
                         client.send(buf);
                         break;
                     }
-
                     case R.id.action_track_mode:
                         if (userType == 2) {
                             Message msg = new Message();
@@ -371,14 +334,12 @@ public class MainActivity extends FragmentActivity {
                             mHandler.sendMessage(msg);
                             return true;
                         }
-
                         if (client.useMultiScale) {
                             client.send(Command.DISABLE_MULTI_SCALE);
                         } else {
                             client.send(Command.ENABLE_MULTI_SCALE);
                         }
                         break;
-
                     case R.id.action_halt:
                         if (client.userID != 0) {
                             Message msg = new Message();
@@ -387,9 +348,7 @@ public class MainActivity extends FragmentActivity {
                             return true;
                         }
                         client.send(Command.HALT);
-
                         break;
-
                     case R.id.action_reboot:
                         if (client.userID != 0) {
                             Message msg = new Message();
@@ -418,7 +377,6 @@ public class MainActivity extends FragmentActivity {
              helper.setForceShowIcon(true);*/
         } catch (Exception e) {
         }
-
     }
 
 
@@ -432,19 +390,13 @@ public class MainActivity extends FragmentActivity {
         builder.setView(view);
         builder.setPositiveButton("确定", null);
 
-
         final TextView noticeTv = view.findViewById(R.id.dialog_notice_tv);
 
         noticeTv.setText(msg);
-
-        //builder.create();
+        // builder.create();
         final AlertDialog dialog = builder.create();
         dialog.show();
-
-
     }
-
-
 
     private boolean checkAddress(String s) {
         return s.matches("((25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d)))\\.){3}(25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d)))") ||
@@ -466,7 +418,6 @@ public class MainActivity extends FragmentActivity {
         builder.setPositiveButton("确定", null);
         builder.setNegativeButton("取消", null);
         builder.setNeutralButton("重置", null);
-
 
         final EditText serverIpEdit = view.findViewById(R.id.server_addr_edt);
         final EditText serverPortEdit = view.findViewById(R.id.server_port_edt);
@@ -518,15 +469,11 @@ public class MainActivity extends FragmentActivity {
 
             @Override
             public void onClick(View v) {
-
                 serverIpEdit.setText(DEFAULT_SERVER_ADDR.getHostString());
                 serverPortEdit.setText(String.valueOf(DEFAULT_SERVER_ADDR.getPort()));
-
             }
         });
-
     }
-
 
     private void showPopupMenu() {
 
@@ -577,24 +524,24 @@ public class MainActivity extends FragmentActivity {
         connectBtn.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
-                String user = userEdt.getText().toString();
-                String pwd = pwdEdt.getText().toString();
+                userName = userEdt.getText().toString();
+                password = pwdEdt.getText().toString();
 
                 if (userType == 2) {
                     userName = "guest";
                     password = "";
                 } else {
-                    if (user.equals("")) {
+                    if (userName.equals("")) {
                         toast.setText("请输入用户名");
                         toast.show();
                         return;
                     }
-                    if (pwd.equals("")) {
+                    if (password.equals("")) {
                         toast.setText("请输入密码");
                         toast.show();
                         return;
                     }
-                    if (!user.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+                    if (!userName.matches("[A-Za-z_][A-Za-z0-9_]*")) {
                         toast.setText("用户名格式不正确");
                         toast.show();
                         return;
@@ -608,7 +555,8 @@ public class MainActivity extends FragmentActivity {
                         client = new Client(serverAddr, userName, password);
                         client.setMainActivity(MainActivity.this);
                         client.setMainHandler(mHandler);
-                        new Timer("Timer").schedule(new TimerTask() {
+                        timer = new Timer("Timer");
+                        timer.schedule(new TimerTask() {
                             public void run() {
                                 if (client.connection() == null) {
                                     client.stop();
@@ -632,8 +580,6 @@ public class MainActivity extends FragmentActivity {
             }
 
         });
-
-
     }
 
     private void initFragmentComponent() {
@@ -641,7 +587,6 @@ public class MainActivity extends FragmentActivity {
         fc[1] = new FragmentComponent(1, R.id.second_sel, R.id.second_tv);
         fc[2] = new FragmentComponent(2, R.id.third_sel, R.id.third_tv);
         fc[3] = new FragmentComponent(3, R.id.fourth_sel, R.id.fourth_tv);
-
     }
 
     private void setSelect(int i) {
@@ -662,8 +607,8 @@ public class MainActivity extends FragmentActivity {
         private Fragment fragTab;
         private LinearLayout fragSel;
         private TextView tv;
-        //private ImageView img;
-        //private int primaryImgSrc, selectedImgSrc;
+        // private ImageView img;
+        // private int primaryImgSrc, selectedImgSrc;
         private String label;
         private final int index;
 
@@ -671,17 +616,16 @@ public class MainActivity extends FragmentActivity {
             index = i;
             fragSel = findViewById(fragSelId);
             tv = findViewById(tvId);
-            //img = (ImageView)findViewById(imgId);
+            // img = (ImageView)findViewById(imgId);
             label = (String) tv.getText();
-            //primaryImgSrc = pImgSrc;
-            //selectedImgSrc = sImgSrc;
+            // primaryImgSrc = pImgSrc;
+            // selectedImgSrc = sImgSrc;
             fragSel.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     setSelect(index);
                 }
             });
         }
-
 
         public void dismiss(FragmentTransaction transaction) {
             if (fragTab != null) {
@@ -736,5 +680,3 @@ public class MainActivity extends FragmentActivity {
 
 
 }
-
-

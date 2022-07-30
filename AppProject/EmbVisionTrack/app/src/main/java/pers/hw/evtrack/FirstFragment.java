@@ -29,17 +29,12 @@ public class FirstFragment extends Fragment {
     private Client client;
 
     private Toast toast;
-
     private TextView driveModeTv;
-
     private SteerView steer;
-
     private TextView speedTv;
 
     private int onMoveCnt;
-
     private int speedAvg;
-
     private float steerAngle;
 
     private int leftCtlVal;
@@ -51,7 +46,6 @@ public class FirstFragment extends Fragment {
     private boolean editListenFlag = true;
 
     private EditText[][] paramEdit = new EditText[4][2];
-
 
     private Handler editHandler = new Handler();
     private Handler mHandler;
@@ -65,30 +59,26 @@ public class FirstFragment extends Fragment {
             // TODO: Implement this method
             switch (msg.what) {
                 case 0:
-                //startActivityForResult(new Intent(mActivity,SettingActivity.class),1);
+                // startActivityForResult(new Intent(mActivity,SettingActivity.class),1);
                 case 1:
                     if (client.motionAutoCtlFlag) {
                         driveModeTv.setText("模式：自动驾驶");
                     } else {
                         driveModeTv.setText("模式：手动驾驶");
                     }
-
-                    if (msg.arg1 == client.userID) {
+                    if (msg.arg1 == 0) {
                         toast.setText("设置成功");
                     } else {
                         if (client.motionAutoCtlFlag) {
-
                             toast.setText("其他用户设置了自动驾驶");
                         } else {
                             toast.setText("其他用户设置了手动驾驶");
                         }
-
                     }
                     toast.show();
-
                     break;
                 case 10:
-                    if (msg.arg1 == client.userID) {
+                    if (msg.arg1 == 0) {
                         toast.setText("设置成功");
                     } else {
                         client.send(Command.UPDATE_PID);
@@ -109,8 +99,6 @@ public class FirstFragment extends Fragment {
                     }
                     editListenFlag = true;
                     break;
-
-
                 default:
                     break;
             }
@@ -120,14 +108,11 @@ public class FirstFragment extends Fragment {
     }
 
     public static FirstFragment newInstance() {
-
         return new FirstFragment();
     }
 
-
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         view = inflater.inflate(R.layout.tab_first, container, false);
         return view;
     }
@@ -142,7 +127,6 @@ public class FirstFragment extends Fragment {
         mHandler = mActivity.getHandler();
         toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         initView();
-
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -152,7 +136,6 @@ public class FirstFragment extends Fragment {
             driveModeTv.setText("模式：自动驾驶");
         } else {
             driveModeTv.setText("模式：手动驾驶");
-
         }
 
         steer = view.findViewById(R.id.steer);
@@ -166,13 +149,10 @@ public class FirstFragment extends Fragment {
 
                 if (++onMoveCnt > 20) {
                     onMoveCnt = 0;
-
                     updateLeftVal();
                     updateRightVal();
-
                     writeMotorVal();
-                    //driveModeTv.setText(String.valueOf(angle));
-
+                    // driveModeTv.setText(String.valueOf(angle));
                 }
             }
         });
@@ -195,7 +175,6 @@ public class FirstFragment extends Fragment {
                             toast.show();
                             return true;
                         }
-
                         isAhead = true;
                         motorStopFlag = false;
                         updateLeftVal();
@@ -211,15 +190,10 @@ public class FirstFragment extends Fragment {
                         if (client.motionAutoCtlFlag) {
                             return true;
                         }
-
-
                         leftCtlVal = 0;
                         rightCtlVal = 0;
                         writeMotorVal();
-
                         motorStopFlag = true;
-
-
                         break;
                     default:
                         break;
@@ -241,39 +215,30 @@ public class FirstFragment extends Fragment {
                             mHandler.sendMessage(msg);
                             return true;
                         }
-
                         if (client.motionAutoCtlFlag) {
                             toast.setText("自动模式下无法操控");
                             toast.show();
 
                             return true;
                         }
-
                         isAhead = false;
                         motorStopFlag = false;
                         updateLeftVal();
                         updateRightVal();
                         writeMotorVal();
                         break;
-
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         if (client.userType == 2) {
                             return true;
                         }
-
                         if (client.motionAutoCtlFlag) {
                             return true;
                         }
-
                         leftCtlVal = 0;
                         rightCtlVal = 0;
                         writeMotorVal();
-
                         motorStopFlag = true;
-
-
-
                         break;
                     default:
                         break;
@@ -283,7 +248,6 @@ public class FirstFragment extends Fragment {
         });
 
         speedTv = view.findViewById(R.id.speed_tv);
-
 
         SeekBar speedBar = view.findViewById(R.id.speed_bar);
         speedBar.setMax(500);
@@ -323,7 +287,6 @@ public class FirstFragment extends Fragment {
 
         });
 
-
         ImageButton motorStopBtn = view.findViewById(R.id.motor_stop_btn);
         motorStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -334,14 +297,13 @@ public class FirstFragment extends Fragment {
                     mHandler.sendMessage(msg);
                     return;
                 }
-
                 client.send(Command.DISABLE_MOTION_AUTOCTL);
                 leftCtlVal = 0;
                 rightCtlVal = 0;
                 writeMotorVal();
 
                 motorStopFlag = true;
-                //client.writeToServer(Command.stop_motor);
+                // client.writeToServer(Command.stop_motor);
             }
 
         });
@@ -358,8 +320,6 @@ public class FirstFragment extends Fragment {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 2; j++) {
                 final int idx = i * 2 + j;
-
-
                 paramEdit[i][j].setText(String.valueOf(client.pidParams[i][j]));
 
                 paramEdit[i][j].addTextChangedListener(new TextWatcher() {
@@ -374,27 +334,19 @@ public class FirstFragment extends Fragment {
                         if (!editListenFlag) return;
 
                         editHandler.removeCallbacks(delayRun);
-
                         editIdx = idx;
-
                         editStr = s.toString();
                         //延迟800ms，如果不再输入字符，则执行该线程的run方法
                         editHandler.postDelayed(delayRun, 1000);
-
                     }
                 });
             }
         }
 
-
-
     }
-
 
     private int editIdx;
     private String editStr;
-
-
 
     /**
      * 延迟线程，看是否还有下一个字符输入
@@ -408,8 +360,6 @@ public class FirstFragment extends Fragment {
             Message msg = new Message();
             msg.what = 12;
             fHandler.sendMessage(msg);
-
-
         }
     };
 
@@ -430,14 +380,12 @@ public class FirstFragment extends Fragment {
 
 
     public void writeMotorVal() {
-        if (client.motionAutoCtlFlag || motorStopFlag)
+        if (client.motionAutoCtlFlag || motorStopFlag) {
             return;
-
+        }
         Buffer buf = Client.createBuffer(Command.SET_MOTOR_VAL);
-
         buf.appendInt32(leftCtlVal);
         buf.appendInt32(rightCtlVal);
-
         client.send(buf);
     }
 
