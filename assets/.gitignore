@@ -1,12 +1,6 @@
 
 build/
+tmp/
 /bin/*
 !/bin/*.sh
-
-tmp/
-
-*.d
-*.dep
-*.o
-*.out
 
