@@ -76,11 +76,16 @@ public:
 
     void resetTarget(const Rect& where)
     {
+        std::lock_guard<std::mutex> lock(mutex_);
         trackResult_ = where;
         resetTracker_ = true;
     }
 
-    Rect trackResult() const { return trackResult_; }
+    Rect trackResult() const
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return trackResult_;
+    }
 
     int imageWidth() const { return imageWidth_; }
     int imageHeight() const { return imageHeight_; }

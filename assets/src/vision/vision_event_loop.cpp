@@ -94,7 +94,7 @@ void VisionEventLoop::loop()
         auto start = util::Timestamp::now();
         track(*img);
         LOG(DEBUG) << "track time: " << (util::Timestamp::now() - start).toMsec() << " ms";
-        if (enableTrack_ && sendTrackResultCallback_) sendTrackResultCallback_(trackResult_);
+        if (enableTrack_ && sendTrackResultCallback_) sendTrackResultCallback_(trackResult());
     }
 }
 
@@ -114,11 +114,14 @@ void VisionEventLoop::track(const cv::Mat& frame)
     if (resetTracker_)
     {
         resetTracker_ = false;
-        int xstart = trackResult_.xpos - trackResult_.width / 2;
-        int ystart = trackResult_.ypos - trackResult_.height / 2;
-        LOG(INFO) << "pos: " << trackResult_.xpos << "," << trackResult_.ypos << " "
-                  << "size: " << trackResult_.width << "," << trackResult_.height;
-        tracker_->reset(cv::Rect(xstart, ystart, trackResult_.width, trackResult_.height), grayImage);
+        cv::Rect roi;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            int xstart = trackResult_.xpos - trackResult_.width / 2;
+            int ystart = trackResult_.ypos - trackResult_.height / 2;
+            roi = cv::Rect(xstart, ystart, trackResult_.width, trackResult_.height);
+        }
+        tracker_->reset(roi, grayImage);
     }
     else if (enableTrack_)
     {
@@ -126,6 +129,7 @@ void VisionEventLoop::track(const cv::Mat& frame)
         int xcenter = result.x + result.width / 2;
         int ycenter = result.y + result.height / 2;
 
+        std::lock_guard<std::mutex> lock(mutex_);
         trackResult_ = {xcenter, ycenter, result.width, result.height};
     }
 
