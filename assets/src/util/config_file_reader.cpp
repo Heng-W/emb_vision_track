@@ -33,7 +33,7 @@ void ConfigFileReader::loadFile(const char* fileName)
     while (getline(file, str))
     {
         vector<string> res = splitString(str, "=");
-        if (res.size() != 2)
+        if (res.size() != 2 || res[0][0] == '#')
         {
             continue;
         }
