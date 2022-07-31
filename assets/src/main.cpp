@@ -2,6 +2,7 @@
 #include "net/event_loop.h"
 #include "vision/vision_event_loop.h"
 #include "control/control_event_loop.h"
+#include "util/logger.h"
 #include "util/config_file_reader.h"
 #include "util/singleton.hpp"
 #include "server.h"
@@ -41,6 +42,7 @@ int main()
 
     const char* portStr = config.get("listen_port");
     uint16_t port = portStr ? static_cast<uint16_t>(atoi(portStr)) : 18825;
+    LOG(INFO) << "listen port: " << port;
 
     Server server(&loop, net::InetAddress(port));
     server.start();
